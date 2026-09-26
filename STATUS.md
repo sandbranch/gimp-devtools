@@ -173,6 +173,14 @@ sweep of abandoned GIMP 2 plug-ins that still have an unmet need in GIMP
 3, ranked, with licenses read from the sources, plus what exists for HDR
 merging, focus stacking and stitching. Nothing chosen yet.
 
+## Photoshop gaps (2026-09-27)
+
+[docs/photoshop-gaps.md](docs/photoshop-gaps.md): Photoshop plug-ins and
+built-ins GIMP 3.2 lacks, ranked. Top: a 3D LUT (Color Lookup) GEGL op,
+a Photoshop-compatible Selective Color op, a hue-weighted Black & White
+op, Blend If, luminosity masks; upstream GIMP asks for the first two
+(issue #15505). Nothing chosen yet.
+
 ## Interlinks (2026-09-27)
 
 [docs/interlinks.md](docs/interlinks.md): GIMP and Blender texture painting
