@@ -173,6 +173,15 @@ sweep of abandoned GIMP 2 plug-ins that still have an unmet need in GIMP
 3, ranked, with licenses read from the sources, plus what exists for HDR
 merging, focus stacking and stitching. Nothing chosen yet.
 
+## Interlinks (2026-09-27)
+
+[docs/interlinks.md](docs/interlinks.md): GIMP and Blender texture painting
+(nothing maintained links them; GIMP 3.2 link layers, Blender's
+`Image.reload`, UV SVG and 16-bit PNG/EXR round trips tested headless) and
+other links for GIMP, with a ranked list of projects. First: a GIMP Link
+for Blender (Blender add-on plus a resident GIMP plug-in over localhost).
+Nothing chosen yet.
+
 ## Other open items
 
 - **Tests in the repos** (done 2026-09-26): every repo has `tests/run.sh`
