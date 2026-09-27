@@ -33,6 +33,7 @@ All under `~/store/code/sandbranch`, pushed to github.com/sandbranch.
 | gegl-underwater | underwater filters: marine snow removal (works), color correction (first version works) | main | both tested; color tuned on 42 Commons photos |
 | gimp-plugin-bimp | BIMP, batch processing | gimp3 (default) | ported; 31 batch tests pass; window tested; installed |
 | gegl-depth-blur | Depth Blur: blur by a depth map (successor to Focus Blur) | main | first version works (command line and GIMP); on GitHub |
+| gimp-tileset-export | Tileset Export: PNG plus Tiled .tsx/.tsj and Godot .tres from an XCF (grid, properties, collision paths, animations, extrusion) | main | works; 95 checks (headless GIMP, Tiled, isolated Godot, Broadway GUI); installed. docs/godot.md: an XCF importer for Godot is feasible |
 | gimp-blender-link | GIMP Link for Blender: Edit in GIMP / Send to Blender, layered XCF with UV link layers, island masks, seam bleed; coexists with the Krita links | main | works end to end; 223 checks (headless Blender and GIMP, Broadway GUI); installed (2026-09-27) |
 | gegl-lut | Color Lookup (LUT): .cube, .3dl and Hald CLUTs as a non-destructive GEGL filter (Colors > Color Lookup), LGPL-3.0+ for upstream | main | works; 205 checks (also under ASan), GIMP checks, matches FFmpeg to 1.8e-7; installed. GEGL png-load and tiff-load bugs found (PLAN.md), not reported yet |
 | gimp-layerfx | Layer Effects (Jonathan Stipe, GPL-3.0+) ported to GIMP 3 and Python 3: 11 Photoshop-style effects as separate layers with their own blend modes, reapply | main | all 11 work; 72 checks pass (headless and Broadway GUI); installed |
@@ -200,6 +201,15 @@ GimpSpriteAtlas port. Nothing chosen yet.
 other links for GIMP, with a ranked list of projects. First: a GIMP Link
 for Blender (Blender add-on plus a resident GIMP plug-in over localhost).
 Nothing chosen yet.
+
+## Test isolation note (2026-09-27)
+
+GIMP runs in the Flatpak write GIO's file-metadata journal
+(`~/.var/app/org.gimp.GIMP/data/gvfs-metadata`) even with a throwaway
+`GIMP3_DIRECTORY`; gimp-tileset-export's tests avoid it with
+`GIO_USE_VFS=local` and HOME/XDG_* inside the sandbox, and snapshot the
+user's folders. The other repos' test scripts (gimp-layerfx and others)
+do not yet: apply the same.
 
 ## Other open items
 
