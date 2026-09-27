@@ -65,7 +65,7 @@ Score = need (0 to 3) x popularity (1 to 3) / effort (small 1, medium 2, large 3
 - **Author and license:** bbbbbr; repo LICENSE GPL-3.0; embedded hqx (Maxim Stepin et al.) and xBR (Hyllian, from FFmpeg) files are LGPL-2.1+.
 - **Last activity:** v1.1 2019-12-14, last commit 2020-08-25. Author active on other GIMP repos (gimp-rom-bin, 2026-08-24).
 - **Popularity:** 105 stars; open issue #8 "GIMP 3 / GTK3 migration" (2020); PR #9 closed unmerged; issue #17 asks for MMPX (2025-12).
-- **GIMP 3 status:** no port; not native; G'MIC has only "Upscale [Scale2x]" (no hqx, no xBR).
+- **GIMP 3 status:** no port; not native; G'MIC has "Upscale [Scale2x]" (factors 2 to 27) and, under Testing > Garagecoder, "Xbr2x" (xBR at 2x without blending, 2013); no hqx and no xBR at 3x or 4x (corrected 2026-09-27). Built as gegl-pixel-scale (not published yet).
 - **Need:** yes.
 - **Effort/fit:** small to medium; the lookup tables are GIMP-independent. Very natural as GEGL ops (fixed-factor upscale, non-destructive only if canvas resize is handled, so a plug-in wrapper that resizes the image then applies the op is the practical UX). Upstream PR plausible.
 
