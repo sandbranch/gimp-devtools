@@ -283,10 +283,11 @@ Expiry here means 20 years from the earliest US non-provisional filing, plus PTA
 | Content-Aware Fill, PatchMatch (section 3) | Adobe PatchMatch US 8,407,575, 8,285,055 and 8,811,749; Generalized PatchMatch US 8,571,328; CAF US 8,818,135 and 10,706,509; Spot Healing US 9,202,299 | About 2029 to 2038 if fees paid | Caution for PatchMatch-based fill. Expired and therefore safe: Criminisi (US 6,987,520, about 2023-03), Adobe's original Healing Brush (US 6,587,592, 2021-11), Poisson editing (US 6,856,705, about 2023-04) and "healing in differential space" (US 7,558,433, 2026-07-29). Resynthesizer's best-fit synthesis is not PatchMatch. |
 | Adaptive Wide Angle, Perspective Warp (section 4) | Adobe US 8,525,871 (about 2031-08); US 9,117,253 "Perspective warp" (about 2033-06) | Active if fees paid | Caution. This is one more reason they are not ranked. |
 
-> Note (2026-09-27): the underwater transmission research
-> (gegl-underwater/docs/transmission-research.md) found US 8,340,461 B2
-> lapsed for non-payment of fees (Google Patents status). The two reports
-> disagree; check the USPTO fee record before relying on either.
+> Note (2026-09-27): settled by a later check
+> (gegl-underwater/docs/patents-transmission.md): US 8,340,461 B2 expired
+> for non-payment of the 7.5-year fee, lapse effective 2020-12-25 (Google
+> Patents legal events). The dark channel prior is free; the Adobe dehaze
+> patents above still need checking.
 
 
 Licence notes for code to borrow:
