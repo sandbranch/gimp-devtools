@@ -29,7 +29,7 @@ All under `~/store/code/sandbranch`, pushed to github.com/sandbranch.
 | gimp-wavelet-sharpen | Wavelet Sharpen plug-in, ported | gimp3 (default), gimp3-upstream | works; not yet offered upstream |
 | gegl-wavelet | `wavelet:sharpen` and `wavelet:denoise` as GEGL operations | main | work, same output as the plug-ins; installed and in use |
 | gimp-lqr-plugin | Liquid Rescale | gimp3 (default) | works; builds liblqr itself (meson subproject); polish open |
-| GIMP-Lensfun | lens correction with the Lensfun database, plug-in and GEGL filter | gimp3 (default) | rewritten for GIMP 3; lensfun:correct keeps it editable; installed |
+| gimp-lensfun | lens correction with the Lensfun database, plug-in and GEGL filter | gimp3 (default) | rewritten for GIMP 3; lensfun:correct keeps it editable; installed |
 | gegl-underwater | underwater filters: marine snow removal (works), color correction (first version works) | main | both tested; color tuned on 42 Commons photos |
 | gimp-plugin-bimp | BIMP, batch processing | gimp3 (default) | ported; 31 batch tests pass; window tested; installed |
 | gegl-depth-blur | Depth Blur: blur by a depth map (successor to Focus Blur) | main | first version works (command line and GIMP); on GitHub |
@@ -77,7 +77,7 @@ In this order, each committed in its own repo as it goes:
    Filters > Enhance > Remove Marine Snow..., tested on a synthetic scene
    and in GIMP; next is real photos.
 3. **Lensfun as a GEGL filter** (live preview, non-destructive). Done:
-   `lensfun:correct` in the GIMP-Lensfun repo (shares the correction code);
+   `lensfun:correct` in the gimp-lensfun repo (shares the correction code);
    the plug-in adds it with the Exif settings ("Keep as an editable
    filter"). tests/compare.sh: plug-in and filter agree.
 
@@ -145,7 +145,7 @@ and UBSan (the Flatpak SDK has the runtimes; `flatpak run --devel`).
 | gegl-wavelet | CIELAB NaN, abort on unbounded input, zero settings changed the image, abort without memory | 116 (`tests/run.sh`) |
 | gimp-wavelet-denoise | YCbCr round trip not exact, CIELAB NaN, indexed/groups/locked layers "succeeded" | 233 (`tests/run.sh`) |
 | gimp-wavelet-sharpen | YCbCr round trip, indexed/groups/locked layers | 209 (`tests/run.sh`) |
-| GIMP-Lensfun | uninitialized Lanczos table, arbitrary lens guessed, positions up to 0.3 px off, stale filter cache, database not thread safe, gray path, groups | 50 (`tests/run.sh`) |
+| gimp-lensfun | uninitialized Lanczos table, arbitrary lens guessed, positions up to 0.3 px off, stale filter cache, database not thread safe, gray path, groups | 50 (`tests/run.sh`) |
 | gimp-lqr-plugin | rigidity and enlargement step ignored, masks by name never found, Repeat always 100x100, seam colour crash, no translation, 1 px crash in liblqr, new-image masks | 74 (`tests/run.sh`, `--asan`) |
 | gimp-plugin-bimp | crash on header-less .bimp, repeated manipulations, reads past arrays, use-after-free in curves, alpha added to every PNG/TIFF/WebP, GIF always failed, metadata dropped, errors counted as success | 70 plus unit tests (`tests/run.sh`, `BIMP_SANITIZE=1`) |
 | gegl-depth-blur | result depended on tiling and threads, highlights and depth in the wrong color space, rotation reversed, NaN spread | 114 (`tests/run.sh`) |
@@ -204,7 +204,7 @@ Nothing chosen yet.
 ## Other open items
 
 - **Tests in the repos** (done 2026-09-26): every repo has `tests/run.sh`
-  (GIMP-Lensfun `tests/compare.sh`), which runs headless in the Flatpak
+  (gimp-lensfun `tests/compare.sh`), which runs headless in the Flatpak
   GIMP and checks results.
 - **Upstream pull requests.** Wavelet Denoise: upstream already has a
   pull request #6 by Arvil (8-bit only); plan is to open ours from

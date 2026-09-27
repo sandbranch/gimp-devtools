@@ -215,7 +215,7 @@ Score = gap (0 to 3) x popularity (1 to 3) / effort (small 1, medium 2, large 3)
 | Layer Styles | Being ported now (layerfx); GEGL `styles`, `bevel`, `inner-glow`, `dropshadow`, `long-shadow` shipped; GSoC work on PSD-compatible Inner Glow (GEGL !275) and Bevel (#16339). Coordinate. |
 | Content-Aware Fill, Content-Aware Move/Patch, Remove tool (non-AI part) | Resynthesizer 3.0.1 (Flathub branch 3): heal selection, heal transparency, uncrop, enlarge, render texture (candidates.md section 3). G'MIC "Inpaint [Patch-Based]", "[Multi-Scale]", "[Transport-Diffusion]". Core "native heal selection" request [#4762](https://gitlab.gnome.org/GNOME/gimp/-/work_items/4762) is closed (16 votes, the highest-voted Photoshop-parity issue seen). |
 | Content-Aware Scale | Our Liquid Rescale port and LQR TNG. |
-| Lens Correction, Camera Raw lens profiles | Our GIMP-Lensfun (`lensfun:correct` in the local op list). |
+| Lens Correction, Camera Raw lens profiles | Our gimp-lensfun (`lensfun:correct` in the local op list). |
 | Lens Blur (depth map) | `gegl:lens-blur` and `gegl:focus-blur` in GIMP; our Depth Blur (`depth:blur`). |
 | Iris, Tilt-Shift, Field blur | `gegl:focus-blur` shapes and on-canvas widget; `gegl:variable-blur` with a mask. (Path and elliptical Spin are candidate 15.) |
 | HDR Toning (tone mapping) | Native Fattal 2002, Mantiuk 2006, Reinhard 2005, Stress, Retinex, Shadows-Highlights. Merge and fusion are candidates.md item 6. |
