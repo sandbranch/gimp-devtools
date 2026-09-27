@@ -33,6 +33,7 @@ All under `~/store/code/sandbranch`, pushed to github.com/sandbranch.
 | gegl-underwater | underwater filters: marine snow removal (works), color correction (first version works) | main | both tested; color tuned on 42 Commons photos |
 | gimp-plugin-bimp | BIMP, batch processing | gimp3 (default) | ported; 31 batch tests pass; window tested; installed |
 | gegl-depth-blur | Depth Blur: blur by a depth map (successor to Focus Blur) | main | first version works (command line and GIMP); on GitHub |
+| gimp-layerfx | Layer Effects (Jonathan Stipe, GPL-3.0+) ported to GIMP 3 and Python 3: 11 Photoshop-style effects as separate layers with their own blend modes, reapply | main | all 11 work; 72 checks pass (headless and Broadway GUI); installed |
 | gimp-lqr-tng | Liquid Rescale TNG (was Liquid Rescale Paint): seam carving with keep, remove and straight painted in its dialog, live preview; after Carlo Baldassi's Liquid Rescale | main | does all the port does and more; 57 GIMP cases + 30 unit tests pass, also under ASan; 7 GUI checks; installed |
 
 The branch `gimp3-upstream` is the port without the "this is a fork" note
