@@ -33,7 +33,7 @@ All under `~/store/code/sandbranch`, pushed to github.com/sandbranch.
 | gegl-underwater | underwater filters: marine snow removal (works), color correction (first version works) | main | both tested; color tuned on 42 Commons photos |
 | gimp-plugin-bimp | BIMP, batch processing | gimp3 (default) | ported; 31 batch tests pass; window tested; installed |
 | gegl-depth-blur | Depth Blur: blur by a depth map (successor to Focus Blur) | main | first version works (command line and GIMP); on GitHub |
-| gimp-blender-link | GIMP Link for Blender: Edit in GIMP / Send to Blender, layered XCF with UV link layers, island masks, seam bleed; coexists with the Krita links | main | works end to end; 223 checks (headless Blender and GIMP, Broadway GUI); not installed yet (the user installs, see README) |
+| gimp-blender-link | GIMP Link for Blender: Edit in GIMP / Send to Blender, layered XCF with UV link layers, island masks, seam bleed; coexists with the Krita links | main | works end to end; 223 checks (headless Blender and GIMP, Broadway GUI); installed (2026-09-27) |
 | gegl-lut | Color Lookup (LUT): .cube, .3dl and Hald CLUTs as a non-destructive GEGL filter (Colors > Color Lookup), LGPL-3.0+ for upstream | main | works; 205 checks (also under ASan), GIMP checks, matches FFmpeg to 1.8e-7; installed. GEGL png-load and tiff-load bugs found (PLAN.md), not reported yet |
 | gimp-layerfx | Layer Effects (Jonathan Stipe, GPL-3.0+) ported to GIMP 3 and Python 3: 11 Photoshop-style effects as separate layers with their own blend modes, reapply | main | all 11 work; 72 checks pass (headless and Broadway GUI); installed |
 | gimp-lqr-tng | Liquid Rescale TNG (was Liquid Rescale Paint): seam carving with keep, remove and straight painted in its dialog, live preview; after Carlo Baldassi's Liquid Rescale | main | does all the port does and more; 57 GIMP cases + 30 unit tests pass, also under ASan; 7 GUI checks; installed |
@@ -41,7 +41,7 @@ All under `~/store/code/sandbranch`, pushed to github.com/sandbranch.
 The branch `gimp3-upstream` is the port without the "this is a fork" note
 in the README, ready for an upstream pull request.
 
-Installed locally: GEGL operations `wavelet-denoise.so` and
+The old gimp-lqr-plugin is uninstalled (2026-09-27, the user keeps only Liquid Rescale TNG; a copy is in ~/store/code/links/backup-20260927). Installed locally: GEGL operations `wavelet-denoise.so` and
 `wavelet-sharpen.so` (the wavelet plug-ins are uninstalled on purpose; the
 GEGL versions are the ones in use), plug-ins `gimp-lensfun` and
 `gimp-lqr-plugin`.
