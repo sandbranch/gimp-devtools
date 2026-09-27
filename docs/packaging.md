@@ -67,8 +67,12 @@ marks what could not be checked.
   add-on "should not have functionality which is extended by external
   software" (localhost is fine) and to ask #extension-moderators when in
   doubt: acceptance of a GIMP bridge is UNVERIFIED.
-- Add-ons that declare `network` are expected to check
-  `bpy.app.online_access`; ours declares it and does not check yet.
+- The manual says an add-on must check `bpy.app.online_access` "if the
+  add-on needs to use internet"
+  ([manual](https://docs.blender.org/manual/en/latest/advanced/extensions/addons.html));
+  the link only talks to 127.0.0.1, and the moderation guidelines say
+  "localhost is fine", so it does not check (as docs/design.md of
+  gimp-blender-link decided). Say so when asking the moderators.
 - Fallback without review: a static extension repository (`blender
   --command extension server-generate`) on GitHub Pages; users add it once.
 
@@ -111,7 +115,7 @@ marks what could not be checked.
    (including the GEGL ops).
 5. Propose GEGL ops in GIMP Flatpak extensions (an issue on
    flathub/org.gimp.GIMP, hand-written).
-6. Blender: the `online_access` check, ask the moderators, meanwhile a
+6. Blender: ask the moderators (localhost only, no internet), meanwhile a
    static repository.
 7. Discovery: org profile README and topics, a PR to the plug-ins list, a
    pixls.us post.
