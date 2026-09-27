@@ -184,6 +184,14 @@ a Photoshop-compatible Selective Color op, a hue-weighted Black & White
 op, Blend If, luminosity masks; upstream GIMP asks for the first two
 (issue #15505). Nothing chosen yet.
 
+## Level editors (2026-09-27)
+
+[docs/level-editors.md](docs/level-editors.md): Tiled, LDtk and Godot
+already reload images GIMP saves (Tiled tested); the gap is metadata. Top:
+a GIMP 3 Tileset Export (PNG plus TSX with grid, properties, collision,
+animations), tile extrusion, autotile templates, Quake WAD export, a
+GimpSpriteAtlas port. Nothing chosen yet.
+
 ## Interlinks (2026-09-27)
 
 [docs/interlinks.md](docs/interlinks.md): GIMP and Blender texture painting
