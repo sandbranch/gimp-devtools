@@ -2,7 +2,7 @@
 
 Date of research: 2026-09-27. Reference build: Flathub `org.gimp.GIMP` 3.2.6 (commit dated 2026-09-20) with the Flathub G'MIC 4.0.5, Resynthesizer 3.0.1 and Fourier extensions installed. GIMP source checked at tag `GIMP_3_2_6`; GEGL source at master (version 0.4.73, last commit 2026-09-17).
 
-This builds on `gimp-plugin-devtools/docs/candidates.md` (abandoned GIMP 2 plug-ins) and does not repeat it. Where a Photoshop gap is already a candidate there (exposure fusion and focus stacking, Refocus, Save for Web, Separate+), it is only cross-referenced.
+This builds on `gimp-devtools/docs/candidates.md` (abandoned GIMP 2 plug-ins) and does not repeat it. Where a Photoshop gap is already a candidate there (exposure fusion and focus stacking, Refocus, Save for Web, Separate+), it is only cross-referenced.
 
 Items marked **UNVERIFIED** could not be checked against a primary source. Popularity is the weakest evidence in this report: Adobe publishes no feature usage data, so it rests on best-of lists, vendor user claims (marked as such), GIMP issue votes and forum threads.
 

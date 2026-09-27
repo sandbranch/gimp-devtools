@@ -1,5 +1,5 @@
 #!/bin/sh
-# Shared settings for the scripts of gimp-plugin-devtools; source it.
+# Shared settings for the scripts of gimp-devtools; source it.
 #
 # GIMP is the Flatpak org.gimp.GIMP if it is installed, otherwise the gimp
 # on the PATH. Set GIMP_FLATPAK=0 to use the native GIMP even when the

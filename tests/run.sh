@@ -1,5 +1,5 @@
 #!/bin/sh
-# Tests for gimp-plugin-devtools that need neither GIMP nor a network:
+# Tests for gimp-devtools that need neither GIMP nor a network:
 #
 # - shellcheck on all shell scripts (skipped if it is not installed)
 # - gimp-env.sh, gimp-build.sh, gimp-run.sh and isolate.sh against a fake
@@ -25,7 +25,7 @@
 
 here=$(CDPATH='' cd -- "$(dirname "$0")" && pwd)
 top=$(dirname "$here")
-tmp=$(mktemp -d "${TMPDIR:-/tmp}/gimp-plugin-devtools-tests.XXXXXX") || exit 1
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/gimp-devtools-tests.XXXXXX") || exit 1
 trap 'rm -rf "$tmp"' EXIT
 trap 'exit 1' INT TERM
 
@@ -339,7 +339,7 @@ $H/.local/share/gegl-0.4/plug-ins" "$out"
     unset GIMP_RUN_HOME
 
     # isolate.sh, the copy in the repositories: its short version without
-    # gimp-plugin-devtools does the same as gimp-run.sh
+    # gimp-devtools does the same as gimp-run.sh
     for dt in "$top" "$tmp/no devtools"; do
         [ "$dt" = "$top" ] && how=with || how=without
         for fp in 1 0; do
@@ -347,12 +347,12 @@ $H/.local/share/gegl-0.4/plug-ins" "$out"
                 src=/nowhere devtools=$1 GIMP_FLATPAK=$2 GIMP_RUN_HOME=$3; shift 3
                 . "$0"
                 gimp_run --env="FOO=$1" --filesystem=/x -- sh -c "$2"' "$top/isolate.sh" "$dt" "$fp" "$th" "a 'b' \"c\"" "$show")
-            check "$shn: isolate.sh $how gimp-plugin-devtools, GIMP_FLATPAK=$fp" "${want%x|}|$src" "$out"
-            [ "$fp" = 1 ] && check "$shn: isolate.sh $how gimp-plugin-devtools: flatpak run with the throwaway home" \
+            check "$shn: isolate.sh $how gimp-devtools, GIMP_FLATPAK=$fp" "${want%x|}|$src" "$out"
+            [ "$fp" = 1 ] && check "$shn: isolate.sh $how gimp-devtools: flatpak run with the throwaway home" \
               "HOME=$th XDG_CONFIG_HOME=$th/.config FLATPAK_USER_DIR=$H/.local/share/flatpak" "$(cat "$tmp/flatpak.log.env")"
         done
         out=$(run bin-flatpak -- -c 'devtools=$1; . "$0"; GIMP_RUN_HOME=$2; gimp_run --timeout=5 -- sh -c "printf \"[%s]\" \"\$@\"" sh "two  words" "q\"u\`o\\te" ""; echo " $?"; gimp_run -- sh -c "exit 7"; echo $?' "$top/isolate.sh" "$dt" "$th")
-        check "$shn: isolate.sh $how gimp-plugin-devtools: arguments and exit codes" "[two  words][q\"u\`o\\te][] 0
+        check "$shn: isolate.sh $how gimp-devtools: arguments and exit codes" "[two  words][q\"u\`o\\te][] 0
 7" "$out"
     done
 done

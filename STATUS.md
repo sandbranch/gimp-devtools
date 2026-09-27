@@ -24,28 +24,36 @@ All under `~/store/code/sandbranch`, pushed to github.com/sandbranch.
 
 | Repo | What | Branch | State |
 |---|---|---|---|
-| gimp-plugin-devtools | build and test scripts for all of them (this repo) | main | done; used by all builds below |
+| gimp-devtools | build and test scripts for all of them (this repo) | main | done; used by all builds below |
 | gimp-wavelet-denoise | Wavelet Denoise plug-in, ported | gimp3 (default), gimp3-upstream | works, 16-bit and float; not yet offered upstream |
 | gimp-wavelet-sharpen | Wavelet Sharpen plug-in, ported | gimp3 (default), gimp3-upstream | works; not yet offered upstream |
 | gegl-wavelet | `wavelet:sharpen` and `wavelet:denoise` as GEGL operations | main | work, same output as the plug-ins; installed and in use |
-| gimp-lqr-plugin | Liquid Rescale | gimp3 (default) | works; builds liblqr itself (meson subproject); polish open |
+| gimp-lqr | Liquid Rescale | gimp3 (default) | works; builds liblqr itself (meson subproject); polish open |
 | gimp-lensfun | lens correction with the Lensfun database, plug-in and GEGL filter | gimp3 (default) | rewritten for GIMP 3; lensfun:correct keeps it editable; installed |
 | gegl-underwater | underwater filters: marine snow removal (works), color correction (first version works) | main | both tested; color tuned on 42 Commons photos |
-| gimp-plugin-bimp | BIMP, batch processing | gimp3 (default) | ported; 31 batch tests pass; window tested; installed |
+| gimp-bimp | BIMP, batch processing | gimp3 (default) | ported; 31 batch tests pass; window tested; installed |
 | gegl-depth-blur | Depth Blur: blur by a depth map (successor to Focus Blur) | main | first version works (command line and GIMP); on GitHub |
 | gimp-tileset-export | Tileset Export: PNG plus Tiled .tsx/.tsj and Godot .tres from an XCF (grid, properties, collision paths, animations, extrusion) | main | works; 95 checks (headless GIMP, Tiled, isolated Godot, Broadway GUI); installed. docs/godot.md: an XCF importer for Godot is feasible |
 | gimp-blender-link | GIMP Link for Blender: Edit in GIMP / Send to Blender, layered XCF with UV link layers, island masks, seam bleed; coexists with the Krita links | main | works end to end; 223 checks (headless Blender and GIMP, Broadway GUI); installed (2026-09-27) |
 | gegl-lut | Color Lookup (LUT): .cube, .3dl and Hald CLUTs as a non-destructive GEGL filter (Colors > Color Lookup), LGPL-3.0+ for upstream | main | works; 205 checks (also under ASan), GIMP checks, matches FFmpeg to 1.8e-7; installed. GEGL png-load and tiff-load bugs found (PLAN.md), not reported yet |
 | gimp-layerfx | Layer Effects (Jonathan Stipe, GPL-3.0+) ported to GIMP 3 and Python 3: 11 Photoshop-style effects as separate layers with their own blend modes, reapply | main | all 11 work; 72 checks pass (headless and Broadway GUI); installed |
 | gimp-lqr-tng | Liquid Rescale TNG (was Liquid Rescale Paint): seam carving with keep, remove and straight painted in its dialog, live preview; after Carlo Baldassi's Liquid Rescale | main | does all the port does and more; 57 GIMP cases + 30 unit tests pass, also under ASan; 7 GUI checks; installed |
+| gegl-adjustments | Selective Color, Black & White, Blend If and luminosity masks as GEGL filters (Colors), plus Create Luminosity Masks; LGPL-3.0+ | main | works; 130 checks (also under ASan), 129 cross-checks against FFmpeg, 78 GIMP checks; installed and on GitHub (2026-09-27) |
+| gimp-pixel-scale | pixel art scalers hqx, xBR, Scale2x/3x/4x: GEGL filters plus Image > Scale Pixel Art (was gegl-pixel-scale) | main | works; 28 of 28 byte-exact against the references, 67 checks, 25 GIMP checks, 7 GUI checks; installed and on GitHub (2026-09-27) |
+| gimp-uv-tools | UV Tools: import UV layouts (Blender SVG, OBJ, Blockbench) as paths, channel and island layers; select islands, seam bleed, fill outside, pack channels | main | works; 285 checks (unit, headless GIMP and Blender, Broadway GUI); installed and on GitHub (2026-09-27) |
+| gimp-forensics | image forensics: ELA, JPEG Ghost, noise, luminance gradient, clone detection filters, a Forensics Workbench and a Content Credentials (C2PA) viewer | main | in progress; the C2PA viewer is done (131 checks) and waits to be merged |
 
 The branch `gimp3-upstream` is the port without the "this is a fork" note
 in the README, ready for an upstream pull request.
 
-The old gimp-lqr-plugin is uninstalled (2026-09-27, the user keeps only Liquid Rescale TNG; a copy is in ~/store/code/links/backup-20260927). Installed locally: GEGL operations `wavelet-denoise.so` and
+The old gimp-lqr is uninstalled (2026-09-27, the user keeps only Liquid Rescale TNG; a copy is in ~/store/code/links/backup-20260927). Installed locally (2026-09-27): GEGL operations `adj-black-and-white.so`, `adj-blend-if.so`,
+`adj-luminosity-mask.so`, `adj-selective-color.so`, `color-lookup.so`,
+`depth-blur.so`, `marine-snow.so`, `underwater-correct.so`,
+`pixel-art-scale.so`, `pixel-art-rescale.so`, `wavelet-denoise.so` and
 `wavelet-sharpen.so` (the wavelet plug-ins are uninstalled on purpose; the
-GEGL versions are the ones in use), plug-ins `gimp-lensfun` and
-`gimp-lqr-plugin`.
+GEGL versions are the ones in use); plug-ins `bimp`, `gimp-blender-link`,
+`gimp-lensfun`, `gimp-lqr-tng`, `layerfx`, `luminosity-masks`,
+`pixel-art-scale`, `tileset-export` and `uv-tools`.
 
 ## Rebuilding everything
 
@@ -55,7 +63,7 @@ With the Flatpak GIMP, from each repo's folder
 
     # plug-ins
     gimp-build.sh . meson setup build -Dplugindir=\$GIMP_PLUGINDIR
-    # (gimp-lqr-plugin calls the option -Dgimp_plugindir)
+    # (gimp-lqr calls the option -Dgimp_plugindir)
     gimp-build.sh . ninja -C build install
 
     # GEGL operations (gegl-wavelet, gegl-underwater)
@@ -70,7 +78,7 @@ README.
 
 In this order, each committed in its own repo as it goes:
 
-1. **BIMP** port to GIMP 3 (`gimp-plugin-bimp`, branch `gimp3`, on github.com/sandbranch/gimp-plugin-bimp). No one else has started one: upstream
+1. **BIMP** port to GIMP 3 (`gimp-bimp`, branch `gimp3`, on github.com/sandbranch/gimp-bimp). No one else has started one: upstream
    is silent since 2023, `v3-dev` is older than master, no forks have
    GIMP 3 work. Adds a non-interactive procedure that runs a saved
    `.bimp` set on files, which also makes it testable headlessly.
@@ -117,7 +125,7 @@ Patents to keep clear of, with the reasons, are in `docs/design.md` and
 The user's idea: a Liquid Rescale window with a small view of the image,
 green Keep and red Remove buttons to paint with, and the controls around
 it. A new plug-in on liblqr (repo gimp-lqr-tng, renamed from
-gimp-lqr-paint; GitHub redirects), not in the ported gimp-lqr-plugin,
+gimp-lqr-paint; GitHub redirects), not in the ported gimp-lqr,
 which stays as the faithful port for upstream. Menu Layer > Liquid
 Rescale TNG..., procedure `plug-in-lqr-tng`.
 
@@ -147,11 +155,11 @@ and UBSan (the Flatpak SDK has the runtimes; `flatpak run --devel`).
 | gimp-wavelet-denoise | YCbCr round trip not exact, CIELAB NaN, indexed/groups/locked layers "succeeded" | 233 (`tests/run.sh`) |
 | gimp-wavelet-sharpen | YCbCr round trip, indexed/groups/locked layers | 209 (`tests/run.sh`) |
 | gimp-lensfun | uninitialized Lanczos table, arbitrary lens guessed, positions up to 0.3 px off, stale filter cache, database not thread safe, gray path, groups | 50 (`tests/run.sh`) |
-| gimp-lqr-plugin | rigidity and enlargement step ignored, masks by name never found, Repeat always 100x100, seam colour crash, no translation, 1 px crash in liblqr, new-image masks | 74 (`tests/run.sh`, `--asan`) |
-| gimp-plugin-bimp | crash on header-less .bimp, repeated manipulations, reads past arrays, use-after-free in curves, alpha added to every PNG/TIFF/WebP, GIF always failed, metadata dropped, errors counted as success | 70 plus unit tests (`tests/run.sh`, `BIMP_SANITIZE=1`) |
+| gimp-lqr | rigidity and enlargement step ignored, masks by name never found, Repeat always 100x100, seam colour crash, no translation, 1 px crash in liblqr, new-image masks | 74 (`tests/run.sh`, `--asan`) |
+| gimp-bimp | crash on header-less .bimp, repeated manipulations, reads past arrays, use-after-free in curves, alpha added to every PNG/TIFF/WebP, GIF always failed, metadata dropped, errors counted as success | 70 plus unit tests (`tests/run.sh`, `BIMP_SANITIZE=1`) |
 | gegl-depth-blur | result depended on tiling and threads, highlights and depth in the wrong color space, rotation reversed, NaN spread | 114 (`tests/run.sh`) |
 | gegl-underwater | heap overflow on thin images, one NaN pixel spoiled all, marine snow depended on tiling, hang on unbounded input | 25 + 8 (`tests/check.sh`, `tests/gimp-check.sh`) |
-| gimp-plugin-devtools | flatpak info translated labels broke the version, `$*` quoting, wrong key codes | 179 (`tests/run.sh`) |
+| gimp-devtools | flatpak info translated labels broke the version, `$*` quoting, wrong key codes | 179 (`tests/run.sh`) |
 
 Open decisions from the audit:
 

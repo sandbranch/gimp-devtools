@@ -23,7 +23,7 @@ marks what could not be checked.
    generated material. So the manifests and PRs must be written by hand,
    and the AI share disclosed. Claude co-authored all commits of the new
    projects and a minority of the forks (gimp-lensfun 13/73,
-   gimp-plugin-bimp 16/231, gimp-lqr-plugin 20/228).
+   gimp-bimp 16/231, gimp-lqr 20/228).
 3. **GEGL operations cannot ship as a Flathub extension or a .gex today.**
    The GIMP Flatpak's extension point merges only `plug-ins` and `scripts`,
    does not set `GEGL_PATH`, and GIMP 3.2.6 loads GEGL modules only from
@@ -102,7 +102,7 @@ marks what could not be checked.
 ## Ranked plan
 
 1. Tagged GitHub Releases with built files, from one reusable workflow in
-   gimp-plugin-devtools (Linux: the GNOME 50 Flatpak SDK container, or
+   gimp-devtools (Linux: the GNOME 50 Flatpak SDK container, or
    Ubuntu 26.04 / Debian testing packages). Prerequisite for everything,
    and the only route for GEGL ops on Flatpak today (download the .so into
    the user GEGL folder).

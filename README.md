@@ -1,4 +1,4 @@
-# gimp-plugin-devtools
+# gimp-devtools
 
 Scripts for building and testing GIMP 3 plug-ins and GEGL operations,
 especially against the Flatpak version of GIMP, used for the plug-ins under
@@ -136,7 +136,7 @@ folders too, so close it during tests.
 The piece each plug-in repository copies into its `tests/` (as
 `tests/isolate.sh`) and sources: `gimp_run [--timeout=SECONDS] ... --
 <command>` runs the command through `gimp-run.sh`, and `snapshot_take` and
-`snapshot_check` wrap `snapshot.sh`. Without gimp-plugin-devtools next to
+`snapshot_check` wrap `snapshot.sh`. Without gimp-devtools next to
 the repository (or at `$GIMP_PLUGIN_DEVTOOLS`) `gimp_run` does the same
 isolation itself, so the tests still run, and the snapshot check is
 skipped. Keep the copies the same as this file.
@@ -205,7 +205,7 @@ Checks the scripts with shellcheck, `gimp-build.sh`, `gimp-env.sh`,
 GIMP in a throwaway HOME (native, Flatpak, no GIMP, GIMP 2, missing SDK,
 translated `flatpak info`, paths with spaces, the isolated environment
 inside the Flatpak and natively, `isolate.sh` with and without
-gimp-plugin-devtools), `snapshot.sh` on a folder of its own, the key events
+gimp-devtools), `snapshot.sh` on a folder of its own, the key events
 of `cdp.mjs`, `cdp.mjs` against a headless Chrome, and typing into a GTK
 text field on Broadway (in the GIMP Flatpak, through `gimp-run.sh`). What
 is not installed (shellcheck, node 22, Chrome, the Flatpak GIMP) is
