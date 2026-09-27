@@ -68,6 +68,79 @@ Settings, from the environment:
   the Flatpak is used if it is installed
 - `GIMP_APP_ID`: the Flatpak, `org.gimp.GIMP` by default
 
+## gimp-run.sh
+
+Runs a command in the GIMP Flatpak (or natively) isolated from your own
+folders, for tests:
+
+    gimp-run.sh --home="$out/home" --filesystem="$src" \
+      --env=GIMP3_DIRECTORY="$out/profile" -- \
+      gimp-console-3.2 --no-interface --batch-interpreter python-fu-eval -b ... --quit
+
+A throwaway GIMP3_DIRECTORY is not enough: GIMP, GEGL and GTK also write
+into the Flatpak's own folders, `~/.var/app/org.gimp.GIMP` (seen in the
+tests of these plug-ins: GIO's file metadata journal in
+`data/gvfs-metadata`, babl's cache and the ccache of builds in `cache`),
+and `flatpak run --env=XDG_...=` does not
+help, because the Flatpak sets the XDG variables itself after `--env`.
+So `gimp-run.sh` starts a shell inside the Flatpak that sets HOME and
+`XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_CACHE_HOME` and `XDG_STATE_HOME`
+to the throwaway home, and `GIO_USE_VFS=local` (no GVFS), and then runs
+the command; the Flatpak runs with `--no-documents-portal`. `flatpak run`
+itself gets the throwaway home as HOME too: it keeps a cache of the
+libraries in `~/.var/app/<app>/.ld.so`, which changes between runs with
+and without `--devel` (your own Flatpak installation, for runtimes such as
+the SDK, stays in use through `FLATPAK_USER_DIR`). Natively the command
+gets the same environment.
+
+Options (also as two words, `--home DIR`):
+
+- `--home=DIR`: the throwaway home, created if it is missing; by default
+  `$GIMP_RUN_HOME`. Required. Your own home folder is refused.
+- `--env=VAR=VALUE`: a variable for the command; unlike `flatpak run
+  --env`, `XDG_*` variables work too
+- `--filesystem=DIR`: a folder the Flatpak may see (`DIR:ro` read only)
+- `--devel`: run with the SDK (for the sanitizer runtimes)
+- `--app=ID`: another Flatpak, e.g. `org.blender.Blender` or
+  `org.godotengine.Godot` (they write into `~/.var/app/<ID>` the same way)
+- `--flatpak`, `--native`: where to run. By default GIMP runs as
+  `GIMP_FLATPAK` says (0 native, 1 the Flatpak, unset the Flatpak if it is
+  installed); another app in its Flatpak if that is installed.
+
+Each argument of the command stays one word. The exit code is that of the
+command. Keep the throwaway home under your home folder or `/tmp` (the
+GIMP Flatpak sees both; for other apps it is added with `--filesystem`).
+
+`gimp-build.sh` runs isolated the same way when `GIMP_RUN_HOME` is set
+(tests set it, so that a build and the checks it runs inside the Flatpak
+leave nothing there either).
+
+## snapshot.sh
+
+Lists your own folders of GIMP, Blender, Godot, Krita and Tiled, native and
+Flatpak (`~/.config/GIMP`, `~/.var/app/org.gimp.GIMP`,
+`~/.var/app/org.blender.Blender`, `~/.var/app/org.godotengine.Godot`,
+`~/.var/app/org.kde.krita`, `~/.config/tiled` and others; `snapshot.sh
+--dirs` prints them all): every file and folder with its type, size and
+modification time. Only names, sizes and times are read, never contents.
+
+    snapshot.sh > before.txt
+    ... run the tests ...
+    snapshot.sh --compare before.txt   # exit 1 and the differences if anything changed
+
+Nothing is ignored. A GIMP of yours that runs meanwhile changes these
+folders too, so close it during tests.
+
+## isolate.sh
+
+The piece each plug-in repository copies into its `tests/` (as
+`tests/isolate.sh`) and sources: `gimp_run [--timeout=SECONDS] ... --
+<command>` runs the command through `gimp-run.sh`, and `snapshot_take` and
+`snapshot_check` wrap `snapshot.sh`. Without gimp-plugin-devtools next to
+the repository (or at `$GIMP_PLUGIN_DEVTOOLS`) `gimp_run` does the same
+isolation itself, so the tests still run, and the snapshot check is
+skipped. Keep the copies the same as this file.
+
 ## gimp-env.sh
 
 Shared settings for the scripts, sourced by them: whether GIMP is the
@@ -82,9 +155,10 @@ GIMP draws into a web page, so dialogs can be tested and screenshotted
 without a display:
 
     # GIMP on a Broadway display, running a Python script (e.g. one that
-    # opens an image and a plug-in dialog); broadwayd stops with GIMP
-    flatpak run --env=GDK_BACKEND=broadway --env=BROADWAY_DISPLAY=:5 \
-      --command=sh org.gimp.GIMP -c \
+    # opens an image and a plug-in dialog), isolated from your folders;
+    # broadwayd stops with GIMP
+    gimp-run.sh --home="$HOME/gimp-test-home" \
+      --env=GDK_BACKEND=broadway --env=BROADWAY_DISPLAY=:5 -- sh -c \
       "broadwayd --port 8085 :5 & bw=\$!; sleep 2; gimp-3.2 --no-splash \
        --batch-interpreter python-fu-eval -b \"exec(open('script.py').read())\"; \
        kill \$bw" &
@@ -126,13 +200,18 @@ the running one.
 
     tests/run.sh
 
-Checks the scripts with shellcheck, `gimp-build.sh` and `gimp-env.sh`
-against a fake `flatpak` and a fake native GIMP in a throwaway HOME (native,
-Flatpak, no GIMP, GIMP 2, missing SDK, translated `flatpak info`, paths with
-spaces), the key events of `cdp.mjs`, `cdp.mjs` against a headless Chrome,
-and typing into a GTK text field on Broadway. What is not installed
-(shellcheck, node 22, Chrome, the Flatpak GIMP) is skipped. Needs no
-network and touches nothing outside a temporary folder.
+Checks the scripts with shellcheck, `gimp-build.sh`, `gimp-env.sh`,
+`gimp-run.sh` and `isolate.sh` against a fake `flatpak` and a fake native
+GIMP in a throwaway HOME (native, Flatpak, no GIMP, GIMP 2, missing SDK,
+translated `flatpak info`, paths with spaces, the isolated environment
+inside the Flatpak and natively, `isolate.sh` with and without
+gimp-plugin-devtools), `snapshot.sh` on a folder of its own, the key events
+of `cdp.mjs`, `cdp.mjs` against a headless Chrome, and typing into a GTK
+text field on Broadway (in the GIMP Flatpak, through `gimp-run.sh`). What
+is not installed (shellcheck, node 22, Chrome, the Flatpak GIMP) is
+skipped. Needs no network and touches nothing outside a temporary folder:
+a snapshot of your folders of GIMP and the other apps before and after
+checks that.
 
 ## License
 

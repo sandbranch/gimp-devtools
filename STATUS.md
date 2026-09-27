@@ -202,14 +202,17 @@ other links for GIMP, with a ranked list of projects. First: a GIMP Link
 for Blender (Blender add-on plus a resident GIMP plug-in over localhost).
 Nothing chosen yet.
 
-## Test isolation note (2026-09-27)
+## Test isolation (2026-09-27)
 
 GIMP runs in the Flatpak write GIO's file-metadata journal
-(`~/.var/app/org.gimp.GIMP/data/gvfs-metadata`) even with a throwaway
-`GIMP3_DIRECTORY`; gimp-tileset-export's tests avoid it with
-`GIO_USE_VFS=local` and HOME/XDG_* inside the sandbox, and snapshot the
-user's folders. The other repos' test scripts (gimp-layerfx and others)
-do not yet: apply the same.
+(`~/.var/app/org.gimp.GIMP/data/gvfs-metadata`), caches (babl, the ccache of
+builds) and `flatpak run` its `.ld.so` cache into the
+Flatpak's own folders, even with a throwaway `GIMP3_DIRECTORY`. Done: every
+test script of the repos above starts GIMP (and Blender) through
+`gimp-run.sh` (via each repo's copy of `isolate.sh`), and builds with
+`GIMP_RUN_HOME` set; each suite lists the user's folders before and
+after (`snapshot.sh`) and fails if anything changed. gimp-tileset-export
+has its own version of the same.
 
 ## Other open items
 

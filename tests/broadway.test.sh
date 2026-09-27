@@ -52,12 +52,15 @@ trap 'exit 1' INT TERM
 # the GTK side: broadwayd, and the text field once the page is open
 inner="broadwayd --port $bport :$display >'$tmp/broadwayd.log' 2>&1 & bw=\$!;
     python3 '$here/broadway-entry.py' '$tmp'; kill \$bw"
+# (isolated from the user's folders by gimp-run.sh: without it, GTK
+# writes GIO's metadata into ~/.var/app/org.gimp.GIMP/data/gvfs-metadata)
 if [ "$flatpak" = 1 ]; then
-    flatpak run --filesystem="$tmp" --filesystem="$here" --env=GDK_BACKEND=broadway \
-        --env=BROADWAY_DISPLAY=":$display" --command=sh org.gimp.GIMP -c "$inner" &
+    mode=--flatpak
 else
-    GDK_BACKEND=broadway BROADWAY_DISPLAY=":$display" sh -c "$inner" &
+    mode=--native
 fi
+"$top/gimp-run.sh" "$mode" --home="$tmp/home" --filesystem="$tmp" --filesystem="$here" \
+    --env=GDK_BACKEND=broadway --env=BROADWAY_DISPLAY=":$display" -- sh -c "$inner" &
 gtk_pid=$!
 
 "$chrome" --headless=new --remote-debugging-port="$cport" --user-data-dir="$tmp/chrome" \

@@ -18,6 +18,12 @@
 # GEGL operations; escape the $ so that they are expanded in the build
 # environment. Each argument of the command stays one word, spaces and all;
 # a command given as a single argument is run as a shell command line.
+#
+# With GIMP_RUN_HOME set to a throwaway folder, the command runs isolated
+# from the user's folders, as with gimp-run.sh: HOME and the XDG folders
+# there, no GVFS. For tests, so that a build and the checks it runs leave
+# nothing in ~/.var/app/org.gimp.GIMP (ccache, GEGL's swap, GIO's
+# metadata). $GIMP_PLUGINDIR and $GEGL_OPDIR are still the user's folders.
 
 usage="usage: $(basename "$0") <source folder> <command...>
        $(basename "$0") --env"
@@ -58,7 +64,16 @@ else
     cmd=${cmd# }
 fi
 
+# (the command runs in the source folder: $0 of this shell)
+# shellcheck disable=SC2016
+in_dir='cd "$0" && sh -c "$1"'
+
 if [ "$GIMP_FLATPAK" = 0 ]; then
+    if [ -n "$GIMP_RUN_HOME" ]; then
+        exec "$(dirname "$0")/gimp-run.sh" --native --home="$GIMP_RUN_HOME" \
+            --env=GIMP_PLUGINDIR="$GIMP_PLUGINDIR" --env=GEGL_OPDIR="$GEGL_OPDIR" \
+            -- sh -c "$in_dir" "$dir" "$cmd"
+    fi
     cd "$dir" || die "cannot enter $dir"
     GIMP_PLUGINDIR=$GIMP_PLUGINDIR GEGL_OPDIR=$GEGL_OPDIR exec sh -c "$cmd"
 fi
@@ -74,6 +89,14 @@ if ! flatpak info "$sdk_ref" >/dev/null 2>&1; then
     esac
     die "$GIMP_SDK, the SDK of the GIMP Flatpak, is not installed; install it with
     flatpak install $inst ${origin:-flathub} $sdk_ref"
+fi
+
+if [ -n "$GIMP_RUN_HOME" ]; then
+    exec "$(dirname "$0")/gimp-run.sh" --flatpak --devel --app="$GIMP_APP_ID" \
+        --home="$GIMP_RUN_HOME" --filesystem="$dir" --filesystem=xdg-config/GIMP \
+        --env=PKG_CONFIG_PATH=/app/lib/pkgconfig:/app/share/pkgconfig \
+        --env=GIMP_PLUGINDIR="$GIMP_PLUGINDIR" --env=GEGL_OPDIR="$GEGL_OPDIR" \
+        -- sh -c "$in_dir" "$dir" "$cmd"
 fi
 
 # inside the Flatpak, the data folder of the app is its XDG_DATA_HOME
