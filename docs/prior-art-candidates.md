@@ -61,7 +61,7 @@ Fit values: **NDE GEGL filter** (single input, stays editable), **plug-in** (mul
 | Quake / Half-Life WAD export | no | [pwitvoet/wadmaker](https://github.com/pwitvoet/wadmaker) (outside GIMP) | open gap | plug-in |
 | Godot XCF importer | no | none; [godot-4-importality](https://github.com/nklbdev/godot-4-importality) is the model | open gap | belongs elsewhere (Godot-side importer) |
 | Tiled "edit in GIMP" | partly | Tiled built-in Commands (`%mapfile`, `%mappath`) | partly covered by Tiled Commands | belongs elsewhere (Tiled extension) |
-| ComfyUI bridge | yes, several | [nchenevey1/gimp-comfy-tools](https://github.com/nchenevey1/gimp-comfy-tools); Spellcaster | covered: drop it | plug-in (network, works in Flatpak) |
+| ComfyUI bridge | yes, several | [nchenevey1/gimp-comfy-tools](https://github.com/nchenevey1/gimp-comfy-tools); [Spellcaster](https://github.com/laboratoiresonore/spellcaster) | covered: drop it | plug-in (network, works in Flatpak) |
 
 ## 1. Photo ideas (from photoshop-gaps.md)
 
@@ -246,8 +246,8 @@ Fit values: **NDE GEGL filter** (single input, stays editable), **plug-in** (mul
 
 ### ComfyUI and other AI bridges
 - **Covered: drop it.** Fit: plug-in over HTTP (works in the Flatpak: `shared=network`).
-- **The installed `comfyui-connector` is Spellcaster** by laboratoiresonore (github.com/laboratoiresonore/spellcaster): 60 stars, created 2026-03-31, pushed 2026-09-26, targets Gimp 3.0 (**verified in code**, read only). Licence is contradictory: GitHub reports NOASSERTION, `LICENSE` is an Unlicense-style public-domain dedication padded with jokes, the README badge says GPL-2.0. Its boot shim auto-updates by default (`auto_update: True`; the local config has no override): on each GIMP start it pulls the plug-in tree from the repo's `main` branch on raw.githubusercontent.com, checked only against GitHub's own tree SHA, and re-downloads `_spellcaster_main.py` on an import crash. In effect it runs unpinned code from `main` at every start. It talks to a "capabilities server" on the ComfyUI machine (default port 8191) whose "license channel sfw/nsfw, tier" field is an entitlement flag, not a software licence. 75 tools; main module is one 1.9 MB file.
-- nchenevey1/gimp-comfy-tools (GPL-3.0, 137 stars, 2026-01-13, GIMP 3 **verified in code**): text-to-image, image-to-image, inpaint from selection, workflow manager, metadata viewer; **also installed here** (`gimp-generate-pers`, `gimp-metadata-viewer`, `workflows`). Companion nodes: nchenevey1/comfyui-gimp-nodes (GPL-3.0).
+- Spellcaster by laboratoiresonore ([github.com/laboratoiresonore/spellcaster](https://github.com/laboratoiresonore/spellcaster)): a GIMP 3 ComfyUI bridge with many tools; created 2026-03-31, pushed 2026-09-26, 60 stars; licence not stated consistently (checked 2026-09-27).
+- nchenevey1/gimp-comfy-tools (GPL-3.0, 137 stars, 2026-01-13, GIMP 3 **verified in code**): text-to-image, image-to-image, inpaint from selection, workflow manager, metadata viewer. Companion nodes: nchenevey1/comfyui-gimp-nodes (GPL-3.0).
 - Others: Charlweed/gimp_comfyui (MIT, 36 stars, pushed 2025-01-08; open issues suggest it is stale on 3.0 final), ProgrammerDruid/gimp-comfy-ai (MIT, 2025-12, **claims** 3.0.4+), swaynos/gimp-comfyui-sam (GPL-3.0, 2026-09-23), gwpelletier/gimp-plugin-ComfyUI (GPL-3.0, 2026-09-23).
 - Non-ComfyUI: intel/openvino-ai-plugins-gimp (Apache-2.0, 805 stars, 2026-09-14), zquestz/dream-prompter (MIT, 151 stars, cloud via Replicate), bunnywaffle/gimp-sd-cpp (MIT, stable-diffusion.cpp), qualcomm/wos-ai-plugins (Snapdragon Windows, licence unclear), Nenotriple/gimp_upscale (MIT, 144 stars, **claims** 3.0), mamipi972 deep_erase (LaMa) and rembg plug-ins (MIT). Still GIMP 2 only: gimp-stable-boy (404 stars), blueturtleai/gimp-stable-diffusion (352 stars).
 - Only open space: Krita AI Diffusion style live painting and regions; Charlweed's attempt looks stale.

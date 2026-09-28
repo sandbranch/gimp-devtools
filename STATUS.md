@@ -45,17 +45,19 @@ All under `~/store/code/sandbranch`, pushed to github.com/sandbranch.
 | gegl-presence | Clarity, Texture, Dehaze (Filters > Enhance), Whites and Blacks (Colors): Camera Raw presence controls, local Laplacian and dark channel | main | works; 114 checks (108 also under ASan), 86 GIMP checks, 12 GUI checks; installed and on GitHub (2026-09-28) |
 | gegl-equalizers | Saturation Equalizer and Advanced Unsharp Mask (Tibor Bamhor), GPL-3.0-only | main | works; within 1 level of the fixed originals on 99.987 % of pixels, 83 checks (ASan), 56 GIMP checks; installed and on GitHub (2026-09-28) |
 | gimp-fusion | Merge Exposures (Mertens), Focus Stack with depth map, Align Layers by Content (Image menu); C plug-in | main | works; 64 unit checks (ASan), 43 GIMP checks, 13 real-image checks (NASA MAHLI, BBBC006), 14 GUI checks; installed and on GitHub (2026-09-28) |
+| gegl-control-points | Control Points (Colors): U-Point style local adjustments, 8 points picked on the image, masks shown | main | works; 50 checks (48 also under ASan), GIMP checks, GUI with the coordinate picker; Nik patents expired; installed and on GitHub (2026-09-28) |
+| gimp-save-for-web | Export for Web (File menu): live preview of the encoded result, exact size, target size, 7 formats, resize, crop, metadata choices; Python rewrite of Aurimas Juska's GIMP 2 plug-in | main | works; 57 unit, 16 GIMP checks over 187 exports, 561 file checks, 36 GUI checks; installed and on GitHub (2026-09-28) |
 
 The branch `gimp3-upstream` is the port without the "this is a fork" note
 in the README, ready for an upstream pull request.
 
 The old gimp-lqr is uninstalled (2026-09-27, the user keeps only Liquid Rescale TNG; a copy is in ~/store/code/links/backup-20260927). Installed locally (2026-09-27): GEGL operations `adj-black-and-white.so`, `adj-blend-if.so`,
 `adj-luminosity-mask.so`, `adj-selective-color.so`, `color-lookup.so`,
-`forensics-*.so` (twelve), `presence-*.so` (four), `equalizers-*.so` (two),
+`forensics-*.so` (twelve), `presence-*.so` (four), `equalizers-*.so` (two), `control-points.so`,
 `depth-blur.so`, `marine-snow.so`, `underwater-correct.so`,
 `pixel-art-scale.so`, `pixel-art-rescale.so`, `wavelet-denoise.so` and
 `wavelet-sharpen.so` (the wavelet plug-ins are uninstalled on purpose; the
-GEGL versions are the ones in use); plug-ins `bimp`, `content-credentials`, `forensics-workbench`, `gimp-blender-link`, `gimp-fusion`, `jpeg-info`,
+GEGL versions are the ones in use); plug-ins `bimp`, `content-credentials`, `forensics-workbench`, `gimp-blender-link`, `gimp-fusion`, `jpeg-info`, `save-for-web`,
 `gimp-lensfun`, `gimp-lqr-tng`, `layerfx`, `luminosity-masks`,
 `pixel-art-scale`, `tileset-export` and `uv-tools`.
 
