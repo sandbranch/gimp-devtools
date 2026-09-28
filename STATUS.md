@@ -41,18 +41,21 @@ All under `~/store/code/sandbranch`, pushed to github.com/sandbranch.
 | gegl-adjustments | Selective Color, Black & White, Blend If and luminosity masks as GEGL filters (Colors), plus Create Luminosity Masks; LGPL-3.0+ | main | works; 130 checks (also under ASan), 129 cross-checks against FFmpeg, 78 GIMP checks; installed and on GitHub (2026-09-27) |
 | gimp-pixel-scale | pixel art scalers hqx, xBR, Scale2x/3x/4x: GEGL filters plus Image > Scale Pixel Art (was gegl-pixel-scale) | main | works; 28 of 28 byte-exact against the references, 67 checks, 25 GIMP checks, 7 GUI checks; installed and on GitHub (2026-09-27) |
 | gimp-uv-tools | UV Tools: import UV layouts (Blender SVG, OBJ, Blockbench) as paths, channel and island layers; select islands, seam bleed, fill outside, pack channels | main | works; 285 checks (unit, headless GIMP and Blender, Broadway GUI); installed and on GitHub (2026-09-27) |
-| gimp-forensics | image forensics: ELA, JPEG Ghost, noise, luminance gradient, clone detection and PCA filters (Filters > Forensics), the Forensics Workbench and the Content Credentials (C2PA) viewer (Image > Forensics) | main | works; 112 operation checks (also under ASan), 110 GIMP filter checks, 14 Workbench checks, 10 GUI checks, 131 Content Credentials checks; installed and on GitHub (2026-09-27). GEGL jpg-load leak found (PLAN.md), not reported yet |
+| gimp-forensics | image forensics: 12 filters (ELA, JPEG Ghost, noise, wavelet noise, min/max, bit planes, echo, median and resampling detection, luminance gradient, clone detection, PCA; Filters > Forensics), the Forensics Workbench, JPEG Info (quality, JPEGsnoop signatures, double compression, thumbnail) and the Content Credentials (C2PA) viewer (Image > Forensics); samples/ with free test images | main | works; 247 operation checks (also under ASan), 179 GIMP checks, 21 Workbench, 49 JPEG Info, 17 GUI, 138 Content Credentials; round 2 installed and on GitHub (2026-09-28) |
+| gegl-presence | Clarity, Texture, Dehaze (Filters > Enhance), Whites and Blacks (Colors): Camera Raw presence controls, local Laplacian and dark channel | main | works; 114 checks (108 also under ASan), 86 GIMP checks, 12 GUI checks; installed and on GitHub (2026-09-28) |
+| gegl-equalizers | Saturation Equalizer and Advanced Unsharp Mask (Tibor Bamhor), GPL-3.0-only | main | works; within 1 level of the fixed originals on 99.987 % of pixels, 83 checks (ASan), 56 GIMP checks; installed and on GitHub (2026-09-28) |
+| gimp-fusion | Merge Exposures (Mertens), Focus Stack with depth map, Align Layers by Content (Image menu); C plug-in | main | works; 64 unit checks (ASan), 43 GIMP checks, 13 real-image checks (NASA MAHLI, BBBC006), 14 GUI checks; installed and on GitHub (2026-09-28) |
 
 The branch `gimp3-upstream` is the port without the "this is a fork" note
 in the README, ready for an upstream pull request.
 
 The old gimp-lqr is uninstalled (2026-09-27, the user keeps only Liquid Rescale TNG; a copy is in ~/store/code/links/backup-20260927). Installed locally (2026-09-27): GEGL operations `adj-black-and-white.so`, `adj-blend-if.so`,
 `adj-luminosity-mask.so`, `adj-selective-color.so`, `color-lookup.so`,
-`forensics-*.so` (six),
+`forensics-*.so` (twelve), `presence-*.so` (four), `equalizers-*.so` (two),
 `depth-blur.so`, `marine-snow.so`, `underwater-correct.so`,
 `pixel-art-scale.so`, `pixel-art-rescale.so`, `wavelet-denoise.so` and
 `wavelet-sharpen.so` (the wavelet plug-ins are uninstalled on purpose; the
-GEGL versions are the ones in use); plug-ins `bimp`, `content-credentials`, `forensics-workbench`, `gimp-blender-link`,
+GEGL versions are the ones in use); plug-ins `bimp`, `content-credentials`, `forensics-workbench`, `gimp-blender-link`, `gimp-fusion`, `jpeg-info`,
 `gimp-lensfun`, `gimp-lqr-tng`, `layerfx`, `luminosity-masks`,
 `pixel-art-scale`, `tileset-export` and `uv-tools`.
 
