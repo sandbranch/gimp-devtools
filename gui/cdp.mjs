@@ -1,5 +1,5 @@
 // Drive a headless Chrome page over the DevTools protocol.
-// usage: node cdp.mjs nav:url size:w,h wait:ms click:x,y down:x,y up:x,y move:x,y
+// usage: node cdp.mjs nav:url size:w,h wait:ms click:x,y rclick:x,y down:x,y up:x,y move:x,y
 //                     key:Name text:abc shot:file.png eval:expression
 // The Chrome is the one listening on 127.0.0.1:$CDP_PORT (default 9333);
 // each step fails after $CDP_TIMEOUT ms (default 30000). Needs node 22 or
@@ -8,7 +8,7 @@ import { writeFileSync } from 'node:fs';
 import { keyEvents, textEvents } from './keys.mjs';
 
 const usage = `usage: node cdp.mjs <action>...
-actions: nav:url size:w,h wait:ms click:x,y down:x,y up:x,y move:x,y
+actions: nav:url size:w,h wait:ms click:x,y rclick:x,y down:x,y up:x,y move:x,y
          key:Name text:abc shot:file.png eval:expression`;
 
 const fail = msg => { console.error(`cdp.mjs: ${msg}`); process.exit(1); };
@@ -40,7 +40,7 @@ const steps = args.map(a => {
       return { k, v };
     case 'size': return { k, v: numbers(v, 2, a) };
     case 'wait': return { k, v: numbers(v, 1, a)[0] };
-    case 'click': case 'down': case 'up': case 'move': return { k, v: numbers(v, 2, a) };
+    case 'click': case 'rclick': case 'down': case 'up': case 'move': return { k, v: numbers(v, 2, a) };
     case 'key':
       try { return { k, v: keyEvents(v) }; } catch (e) { fail(`${a}: ${e.message}`); }
     case 'text': return { k, v: textEvents(v) };
@@ -83,11 +83,14 @@ try {
     if (k === 'nav') await send('Page.navigate', { url: v });
     else if (k === 'size') await send('Emulation.setDeviceMetricsOverride', { width: v[0], height: v[1], deviceScaleFactor: 1, mobile: false });
     else if (k === 'wait') await new Promise(r => setTimeout(r, v));
-    else if (['click', 'down', 'up', 'move'].includes(k)) {
+    else if (['click', 'rclick', 'down', 'up', 'move'].includes(k)) {
       const [x, y] = v;
+      const button = k === 'rclick' ? 'right' : 'left';
+      const press = k === 'click' || k === 'rclick' || k === 'down';
+      const release = k === 'click' || k === 'rclick' || k === 'up';
       await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y, button: 'none' });
-      if (k === 'click' || k === 'down') await send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 });
-      if (k === 'click' || k === 'up') await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
+      if (press) await send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button, clickCount: 1 });
+      if (release) await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button, clickCount: 1 });
     }
     else if (k === 'key' || k === 'text') for (const ev of v) await send('Input.dispatchKeyEvent', ev);
     else if (k === 'shot') {
