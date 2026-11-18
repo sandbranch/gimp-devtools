@@ -1,5 +1,6 @@
 #!/bin/sh
-# Lists the user's own folders of GIMP, Blender, Godot, Krita and Tiled
+# Lists the user's own folders of GIMP (native: its profile, GEGL's
+# operations, the caches of GIMP and babl), Blender, Godot, Krita and Tiled
 # (native and Flatpak): every file and folder with its type, size and
 # modification time, or "absent" for a folder that is not there. A test
 # takes one listing before and one after and compares them, to prove that
@@ -24,7 +25,9 @@ h=${SNAPSHOT_HOME:-$HOME}
 folders () {
     for d in \
         .config/GIMP \
-        .var/app/org.gimp.GIMP \
+        .local/share/gegl-0.4 \
+        .cache/gimp \
+        .cache/babl \
         .var/app/org.blender.Blender \
         .config/blender \
         .cache/blender \

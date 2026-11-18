@@ -1,47 +1,46 @@
 #!/bin/sh
-# Runs a command in the Flatpak of GIMP (or of another app, such as
-# Blender or Godot) isolated from the user's own folders: HOME, the XDG
-# folders (config, data, cache, state) and GIO's file metadata all point
-# into a throwaway home, so that a test leaves nothing in
-# ~/.var/app/<app>, ~/.config/GIMP and the like. Natively
-# (GIMP_FLATPAK=0, or --native) the command gets the same environment.
+# Runs a command (GIMP, or another app such as Blender, Godot or Krita)
+# isolated from the user's own folders: HOME, the XDG folders (config,
+# data, cache, state) and GIO's file metadata all point into a throwaway
+# home, so that a test leaves nothing in ~/.config/GIMP and the like.
+#
+# GIMP always runs natively. Another app (--app=ID) runs in its Flatpak
+# when that is installed (here Godot, Krita and Inkscape are Flatpaks),
+# otherwise natively.
 #
 #   gimp-run.sh [options] [--] <command> [arguments...]
 #
 # e.g.
 #   gimp-run.sh --home="$out/home" --env=GIMP3_DIRECTORY="$out/profile" \
-#     --filesystem="$src" -- gimp-console-3.2 --no-interface -b ... --quit
+#     -- gimp-console-3.2 --no-interface -b ... --quit
 #
 # Options (also as two words: --home DIR):
 #   --home=DIR        the throwaway home, created if missing; default
 #                     $GIMP_RUN_HOME. Required. Keep it under your home
-#                     folder or /tmp, which the Flatpak can see.
+#                     folder or /tmp, which a Flatpak can see.
 #   --env=VAR=VALUE   set VAR for the command (repeatable); unlike
 #                     flatpak run --env, also XDG_* variables
+#   --app=ID          the app: org.gimp.GIMP (GIMP, native) by default,
+#                     or the Flatpak ID of another app
+#   --native          run natively (the default for GIMP)
+#   --flatpak         run the other app in its Flatpak (not for GIMP)
 #   --filesystem=DIR  let the Flatpak see DIR (repeatable; natively
 #                     ignored); DIR:ro for read only
-#   --devel           run with the SDK (flatpak run --devel), e.g. for
-#                     the sanitizer runtimes
-#   --app=ID          the Flatpak: $GIMP_APP_ID (org.gimp.GIMP) by default
-#   --flatpak, --native
-#                     run in the Flatpak, or natively. By default, for
-#                     GIMP as GIMP_FLATPAK says (0 native, 1 Flatpak,
-#                     unset the Flatpak if it is installed); for another
-#                     app the Flatpak if it is installed
+#   --devel           run the Flatpak with its SDK (natively ignored)
 #
-# Why each part is needed: the Flatpak sets the XDG_* variables itself,
-# after flatpak run --env, so they are set inside the sandbox by a shell
-# that then runs the command. flatpak run gets the throwaway home too (see
-# below), so that it keeps nothing in ~/.var/app/<app> either. GIO_USE_VFS=local keeps GIO from writing its
-# metadata journal (~/.var/app/<app>/data/gvfs-metadata) through GVFS.
+# For a Flatpak: the Flatpak sets the XDG_* variables itself, after
+# flatpak run --env, so they are set inside the sandbox by a shell that
+# then runs the command. flatpak run gets the throwaway home too (see
+# below), so that it keeps nothing in ~/.var/app/<app> either.
 # --no-documents-portal keeps files from being registered with the
-# document portal. The exit code is that of the command.
+# document portal. In both cases GIO_USE_VFS=local keeps GIO from writing
+# its metadata journal through GVFS. The exit code is that of the command.
 #
 # Copyright 2026 David
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-usage="usage: $(basename "$0") [--home=DIR] [--env=VAR=VALUE]... [--filesystem=DIR]...
-       [--devel] [--app=ID] [--flatpak | --native] [--] <command> [arguments...]"
+usage="usage: $(basename "$0") [--home=DIR] [--env=VAR=VALUE]... [--app=ID] [--native | --flatpak]
+       [--filesystem=DIR]... [--devel] [--] <command> [arguments...]"
 
 die () {
     echo "$(basename "$0"): $*" >&2
@@ -54,8 +53,7 @@ q () {
 }
 
 home=$GIMP_RUN_HOME
-app=${GIMP_APP_ID:-org.gimp.GIMP}
-app_given=
+app=org.gimp.GIMP
 mode=
 devel=
 fs=
@@ -74,7 +72,7 @@ while [ $# -gt 0 ]; do
         --env=*=*) envs="$envs $(q "${opt#--env=}")" ;;
         --env=*) die "--env needs VAR=VALUE, not ${opt#--env=}" ;;
         --filesystem=?*) fs="$fs $(q "$opt")" ;;
-        --app=?*) app=${opt#--app=}; app_given=1 ;;
+        --app=?*) app=${opt#--app=} ;;
         --devel) devel=--devel ;;
         --flatpak) mode=flatpak ;;
         --native) mode=native ;;
@@ -95,21 +93,14 @@ home=$(CDPATH='' cd -- "$home" && pwd) || die "cannot enter $home"
 real_home=$(CDPATH='' cd -- "$HOME" 2>/dev/null && pwd)
 [ "$home" != "$real_home" ] && [ "$home" != / ] || die "$home is not a throwaway home"
 
-if [ -z "$mode" ]; then
-    if [ -z "$app_given" ] || [ "$app" = "${GIMP_APP_ID:-org.gimp.GIMP}" ]; then
-        case $GIMP_FLATPAK in
-            1) mode=flatpak ;;
-            0) mode=native ;;
-            '') ;;
-            *) die "GIMP_FLATPAK must be 0 (native GIMP), 1 (the Flatpak) or unset (either), not '$GIMP_FLATPAK'" ;;
-        esac
-    fi
-    if [ -z "$mode" ]; then
-        if command -v flatpak >/dev/null 2>&1 && flatpak info "$app" >/dev/null 2>&1; then
-            mode=flatpak
-        else
-            mode=native
-        fi
+if [ "$app" = org.gimp.GIMP ]; then
+    [ "$mode" != flatpak ] || die "the GIMP Flatpak is not supported; GIMP runs natively"
+    mode=native
+elif [ -z "$mode" ]; then
+    if command -v flatpak >/dev/null 2>&1 && flatpak info "$app" >/dev/null 2>&1; then
+        mode=flatpak
+    else
+        mode=native
     fi
 fi
 

@@ -3,14 +3,15 @@
 #
 # - shellcheck on all shell scripts (skipped if it is not installed)
 # - gimp-env.sh, gimp-build.sh, gimp-run.sh and isolate.sh against a fake
-#   flatpak and a fake native GIMP in a throwaway HOME, for the native,
-#   Flatpak, missing GIMP and missing SDK cases and the isolated
-#   environment, with each POSIX shell found (dash, bash, busybox)
+#   native GIMP and a fake flatpak (for the other apps, and to prove that
+#   a GIMP Flatpak is ignored) in a throwaway HOME: native GIMP 3, GIMP 2,
+#   no GIMP, GIMP_FLATPAK refused, and the isolated environment, with each
+#   POSIX shell found (dash, bash, busybox)
 # - snapshot.sh on a folder of its own
 # - the key events of gui/cdp.mjs (skipped without node 22 or later)
 # - gui/cdp.mjs against a headless Chrome (skipped without Chrome), and
-#   typing into a GTK text field on Broadway (skipped without Chrome or the
-#   Flatpak GIMP or broadwayd; takes a few seconds)
+#   typing into a GTK text field on Broadway (skipped without Chrome or
+#   GIMP or broadwayd; takes a few seconds)
 #
 #   tests/run.sh
 #
@@ -70,9 +71,9 @@ fi
 
 # --- fake flatpak and GIMP ---------------------------------------------------
 #
-# FAKE_GIMP: where the GIMP Flatpak is installed (system, user) or empty
-# FAKE_SDK: 1 if its SDK is installed
-# flatpak info prints Spanish labels unless LC_ALL=C, like a real one
+# FAKE_GIMP: where a GIMP Flatpak is installed (system, user) or empty;
+# the scripts must ignore it and use the native GIMP. Blender is always
+# "installed" as a Flatpak, for the other-app cases of gimp-run.sh.
 
 mkdir -p "$tmp/bin-flatpak" "$tmp/bin-native3" "$tmp/bin-native2" "$tmp/bin-none"
 cat > "$tmp/bin-flatpak/flatpak" <<'EOF'
@@ -177,7 +178,7 @@ for shn in $shells; do
     out=$(run bin-none -- "$build" --env); rc=$?
     check "$shn: no GIMP fails" 1 "$rc"
     check_has "$shn: no GIMP says so" "no GIMP found" "$out"
-    check_has "$shn: no GIMP says how to install it" "flatpak install flathub org.gimp.GIMP" "$out"
+    check_has "$shn: no GIMP says how to install it" "apt install gimp libgimp-3.0-dev" "$out"
     out=$(run bin-none -- "$build" "$src" true); rc=$?
     check "$shn: no GIMP fails the build" 1 "$rc"
 
@@ -187,7 +188,7 @@ for shn in $shells; do
 
     # native GIMP 3
     out=$(run bin-native3 -- "$build" --env)
-    check "$shn: native GIMP_FLATPAK" 0 "$(val GIMP_FLATPAK "$out")"
+    check "$shn: native GIMP_CONSOLE" gimp-console "$(val GIMP_CONSOLE "$out")"
     check "$shn: native GIMP_VERSION" 3.0.4 "$(val GIMP_VERSION "$out")"
     check "$shn: native GIMP_PLUGINDIR" "$H/.config/GIMP/3.0/plug-ins" "$(val GIMP_PLUGINDIR "$out")"
     check "$shn: native GEGL_OPDIR" "$H/.local/share/gegl-0.4/plug-ins" "$(val GEGL_OPDIR "$out")"
@@ -228,87 +229,63 @@ $H/.local/share/gegl-0.4/plug-ins" "$out"
     check "$shn: CDPATH does not change the source folder" "$src" "$out"
     unset CDPATH
 
-    # Flatpak GIMP
+    # a GIMP Flatpak is ignored: the native GIMP is used, or none is found
     FAKE_GIMP=system FAKE_SDK=1
     out=$(run bin-flatpak bin-native3 -- "$build" --env)
-    check "$shn: Flatpak GIMP_FLATPAK" 1 "$(val GIMP_FLATPAK "$out")"
-    check "$shn: Flatpak GIMP_VERSION despite translated labels" 3.2.6 "$(val GIMP_VERSION "$out")"
-    check "$shn: Flatpak GIMP_SDK" org.gnome.Sdk/x86_64/50 "$(val GIMP_SDK "$out")"
-    check "$shn: Flatpak GIMP_PLUGINDIR" "$H/.config/GIMP/3.2/plug-ins" "$(val GIMP_PLUGINDIR "$out")"
-    check "$shn: Flatpak GEGL_OPDIR" "$H/.var/app/org.gimp.GIMP/data/gegl-0.4/plug-ins" "$(val GEGL_OPDIR "$out")"
-
-    out=$(run bin-flatpak -- "$build" "$src" printf '[%s]' "two  words" '$GIMP_PLUGINDIR' '$GEGL_OPDIR' 'q"u`o\te')
-    check "$shn: Flatpak build arguments" "[two  words][$H/.config/GIMP/3.2/plug-ins][$H/.var/app/org.gimp.GIMP/data/gegl-0.4/plug-ins][q\"u\`o\\te]" "$out"
-    check_has "$shn: Flatpak build runs with the SDK" "--devel " "$(cat "$tmp/flatpak.log")"
-    check_has "$shn: Flatpak build can see the source folder" "--filesystem=$src" "$(cat "$tmp/flatpak.log")"
-    out=$(run bin-flatpak -- "$build" "$src" pwd)
-    check "$shn: Flatpak build runs in the source folder" "$src" "$out"
-    run bin-flatpak -- "$build" "$src" sh -c 'exit 7' >/dev/null; rc=$?
-    check "$shn: Flatpak build exit code" 7 "$rc"
-
-    GIMP_FLATPAK=0
-    out=$(run bin-flatpak bin-native3 -- "$build" --env)
-    check "$shn: GIMP_FLATPAK=0 uses the native GIMP" 3.0.4 "$(val GIMP_VERSION "$out")"
+    check "$shn: a GIMP Flatpak is ignored for the native GIMP" 3.0.4 "$(val GIMP_VERSION "$out")"
+    check "$shn: GEGL_OPDIR is the native one despite a GIMP Flatpak" "$H/.local/share/gegl-0.4/plug-ins" "$(val GEGL_OPDIR "$out")"
     out=$(run bin-flatpak -- "$build" --env); rc=$?
-    check "$shn: GIMP_FLATPAK=0 without a native GIMP fails" 1 "$rc"
-    check_has "$shn: GIMP_FLATPAK=0 without a native GIMP says so" "GIMP_FLATPAK=0 but" "$out"
-    GIMP_FLATPAK=yes
-    out=$(run bin-flatpak -- "$build" "$src" true); rc=$?
-    check "$shn: GIMP_FLATPAK=yes fails" 1 "$rc"
-    check_has "$shn: GIMP_FLATPAK=yes says why" "GIMP_FLATPAK must be 0" "$out"
+    check "$shn: only a GIMP Flatpak is no GIMP" 1 "$rc"
+    check_has "$shn: only a GIMP Flatpak says no GIMP found" "no GIMP found" "$out"
+    : > "$tmp/flatpak.log"
+    out=$(run bin-flatpak bin-native3 -- "$build" "$src" pwd)
+    check "$shn: the build never runs flatpak" "$src|" "$out|$(cat "$tmp/flatpak.log")"
     GIMP_FLATPAK=1
-    out=$(run bin-native3 -- "$build" "$src" true); rc=$?
-    check "$shn: GIMP_FLATPAK=1 without flatpak fails" 1 "$rc"
-    check_has "$shn: GIMP_FLATPAK=1 without flatpak says so" "flatpak is not installed" "$out"
+    out=$(run bin-flatpak bin-native3 -- "$build" "$src" true); rc=$?
+    check "$shn: GIMP_FLATPAK=1 fails" 1 "$rc"
+    check_has "$shn: GIMP_FLATPAK=1 says it is no longer supported" "no longer supported" "$out"
+    GIMP_FLATPAK=0
+    out=$(run bin-native3 -- "$build" --env)
+    check "$shn: GIMP_FLATPAK=0 is accepted" 3.0.4 "$(val GIMP_VERSION "$out")"
     unset GIMP_FLATPAK
 
-    # missing SDK: say how to install it, into the installation of GIMP
-    FAKE_GIMP=user FAKE_SDK=0
-    out=$(run bin-flatpak -- "$build" "$src" true); rc=$?
-    check "$shn: missing SDK fails" 1 "$rc"
-    check_has "$shn: missing SDK says how to install it" "flatpak install --user flathub org.gnome.Sdk//50" "$out"
-    FAKE_GIMP=system
-    out=$(run bin-flatpak -- "$build" "$src" true)
-    check_has "$shn: missing SDK, system GIMP" "flatpak install --system flathub org.gnome.Sdk//50" "$out"
-
-    # gimp-run.sh: the command in the Flatpak (or natively) with HOME, the
-    # XDG folders and GIO in a throwaway home
+    # gimp-run.sh: GIMP natively, another app in its Flatpak, with HOME,
+    # the XDG folders and GIO in a throwaway home
     grun="$top/gimp-run.sh"
     th="$tmp/throw away"
     show='printf "%s|" "$HOME" "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$XDG_STATE_HOME" "$GIO_USE_VFS" "$FOO" "$XDG_EXTRA"; pwd'
     want="$th|$th/.config|$th/.local/share|$th/.cache|$th/.local/state|local|a 'b' \"c\"|x|"
     FAKE_GIMP=system FAKE_SDK=1
+    : > "$tmp/flatpak.log"
     out=$(cd "$src" && run bin-flatpak -- "$grun" --home="$th" --env="FOO=a 'b' \"c\"" --env=XDG_EXTRA=x sh -c "$show")
-    check "$shn: gimp-run in the Flatpak: isolated environment" "$want$src" "$out"
-    log=$(cat "$tmp/flatpak.log")
-    check_has "$shn: gimp-run: no documents portal" "--no-documents-portal" "$log"
-    check_has "$shn: gimp-run: the Flatpak sees the throwaway home" "--filesystem=$th " "$log"
-    check_has "$shn: gimp-run: runs in org.gimp.GIMP" " org.gimp.GIMP -c " "$log"
-    check "$shn: gimp-run: flatpak run with the throwaway home and your Flatpaks" \
-      "HOME=$th XDG_CONFIG_HOME=$th/.config FLATPAK_USER_DIR=$H/.local/share/flatpak" "$(cat "$tmp/flatpak.log.env")"
+    check "$shn: gimp-run: GIMP natively despite a GIMP Flatpak, isolated" "$want$src|" "$out|$(cat "$tmp/flatpak.log")"
     out=$(run bin-flatpak -- "$grun" --home "$th" --filesystem "$src" --devel -- sh -c 'printf "[%s]" "$@"' sh "two  words" 'q"u`o\te' '' '$HOME' --home)
     check "$shn: gimp-run: each argument stays a word" "[two  words][q\"u\`o\\te][][\$HOME][--home]" "$out"
-    check_has "$shn: gimp-run: --filesystem" "--filesystem=$src " "$(cat "$tmp/flatpak.log")"
-    check_has "$shn: gimp-run: --devel" "--devel " "$(cat "$tmp/flatpak.log")"
     run bin-flatpak -- "$grun" --home="$th" sh -c 'exit 7' >/dev/null; rc=$?
     check "$shn: gimp-run: exit code of the command" 7 "$rc"
+    out=$(run bin-flatpak -- "$grun" --home="$th" --flatpak true); rc=$?
+    check_has "$shn: gimp-run --flatpak for GIMP is refused" "2 gimp-run.sh: the GIMP Flatpak is not supported" "$rc $out"
     GIMP_RUN_HOME="$th"
     out=$(run bin-flatpak -- "$grun" sh -c 'echo "$HOME"')
     check "$shn: gimp-run: GIMP_RUN_HOME" "$th" "$out"
-    GIMP_FLATPAK=0
-    out=$(cd "$src" && run bin-flatpak -- "$grun" --env="FOO=a 'b' \"c\"" --env=XDG_EXTRA=x sh -c "$show")
-    check "$shn: gimp-run natively (GIMP_FLATPAK=0): the same environment" "$want$src" "$out"
+    # another app: in its Flatpak, with the throwaway home for flatpak run
     : > "$tmp/flatpak.log"
-    out=$(run bin-flatpak -- "$grun" --app=org.blender.Blender sh -c 'echo "$FAKE_APP"')
-    check_has "$shn: gimp-run --app: another app in its Flatpak despite GIMP_FLATPAK=0" " org.blender.Blender -c " "$(cat "$tmp/flatpak.log")"
-    unset GIMP_FLATPAK
+    out=$(cd "$src" && run bin-flatpak -- "$grun" --app=org.blender.Blender --filesystem="$src" --devel \
+      --env="FOO=a 'b' \"c\"" --env=XDG_EXTRA=x sh -c "$show")
+    check "$shn: gimp-run --app: isolated environment in the Flatpak" "$want$src" "$out"
+    log=$(cat "$tmp/flatpak.log")
+    check_has "$shn: gimp-run --app: runs in its Flatpak" " org.blender.Blender -c " "$log"
+    check_has "$shn: gimp-run --app: no documents portal" "--no-documents-portal" "$log"
+    check_has "$shn: gimp-run --app: the Flatpak sees the throwaway home" "--filesystem=$th " "$log"
+    check_has "$shn: gimp-run --app: --filesystem" "--filesystem=$src " "$log"
+    check_has "$shn: gimp-run --app: --devel" "--devel " "$log"
+    check "$shn: gimp-run --app: flatpak run with the throwaway home and your Flatpaks" \
+      "HOME=$th XDG_CONFIG_HOME=$th/.config FLATPAK_USER_DIR=$H/.local/share/flatpak" "$(cat "$tmp/flatpak.log.env")"
     : > "$tmp/flatpak.log"
-    out=$(run bin-flatpak -- "$grun" --native sh -c 'echo "$XDG_DATA_HOME"')
-    check "$shn: gimp-run --native" "$th/.local/share|" "$out|$(cat "$tmp/flatpak.log")"
-    FAKE_GIMP=
-    out=$(run bin-flatpak -- "$grun" sh -c 'echo "$HOME|$FAKE_IN_FLATPAK"')
-    check "$shn: gimp-run without the Flatpak runs natively" "$th|" "$out"
-    FAKE_GIMP=system
+    out=$(run bin-flatpak -- "$grun" --app=org.blender.Blender --native sh -c 'echo "$XDG_DATA_HOME"')
+    check "$shn: gimp-run --app --native" "$th/.local/share|" "$out|$(cat "$tmp/flatpak.log")"
+    out=$(run bin-flatpak -- "$grun" --app=org.example.NotInstalled sh -c 'echo "$HOME|$FAKE_IN_FLATPAK"')
+    check "$shn: gimp-run --app without its Flatpak runs natively" "$th|" "$out"
     unset GIMP_RUN_HOME
     out=$(run bin-flatpak -- "$grun" true); rc=$?
     check "$shn: gimp-run without a home fails" 2 "$rc"
@@ -319,38 +296,37 @@ $H/.local/share/gegl-0.4/plug-ins" "$out"
     check_has "$shn: gimp-run: unknown option" "unknown option --bogus" "$rc $out"
     out=$(run bin-flatpak -- "$grun" --home="$th" --env=FOO true); rc=$?
     check_has "$shn: gimp-run: --env without a value" "needs VAR=VALUE" "$rc $out"
-    GIMP_FLATPAK=yes
-    out=$(run bin-flatpak -- "$grun" --home="$th" true); rc=$?
-    check_has "$shn: gimp-run: GIMP_FLATPAK=yes fails" "2 gimp-run.sh: GIMP_FLATPAK must be 0" "$rc $out"
-    unset GIMP_FLATPAK
 
     # gimp-build.sh with GIMP_RUN_HOME: the build isolated the same way,
     # the user's folders still in $GIMP_PLUGINDIR and $GEGL_OPDIR
     GIMP_RUN_HOME="$th"
-    out=$(run bin-flatpak -- "$build" "$src" 'printf "%s|" "$HOME" "$XDG_CACHE_HOME" "$GIO_USE_VFS" "$GIMP_PLUGINDIR" "$GEGL_OPDIR"; pwd')
-    check "$shn: gimp-build.sh isolated in the Flatpak" "$th|$th/.cache|local|$H/.config/GIMP/3.2/plug-ins|$H/.var/app/org.gimp.GIMP/data/gegl-0.4/plug-ins|$src" "$out"
-    check_has "$shn: gimp-build.sh isolated: with the SDK" "--devel " "$(cat "$tmp/flatpak.log")"
-    out=$(run bin-flatpak -- "$build" "$src" printf '[%s]' "two  words" '$GEGL_OPDIR')
-    check "$shn: gimp-build.sh isolated: arguments" "[two  words][$H/.var/app/org.gimp.GIMP/data/gegl-0.4/plug-ins]" "$out"
-    run bin-flatpak -- "$build" "$src" sh -c 'exit 7' >/dev/null; rc=$?
+    : > "$tmp/flatpak.log"
+    out=$(run bin-flatpak bin-native3 -- "$build" "$src" 'printf "%s|" "$HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" "$GIO_USE_VFS" "$GIMP_PLUGINDIR" "$GEGL_OPDIR"; pwd')
+    check "$shn: gimp-build.sh isolated" "$th|$th/.local/share|$th/.cache|local|$H/.config/GIMP/3.0/plug-ins|$H/.local/share/gegl-0.4/plug-ins|$src|" "$out|$(cat "$tmp/flatpak.log")"
+    out=$(run bin-native3 -- "$build" "$src" printf '[%s]' "two  words" '$GEGL_OPDIR')
+    check "$shn: gimp-build.sh isolated: arguments" "[two  words][$H/.local/share/gegl-0.4/plug-ins]" "$out"
+    run bin-native3 -- "$build" "$src" sh -c 'exit 7' >/dev/null; rc=$?
     check "$shn: gimp-build.sh isolated: exit code" 7 "$rc"
-    out=$(run bin-native3 -- "$build" "$src" 'printf "%s|" "$HOME" "$XDG_DATA_HOME" "$GIMP_PLUGINDIR"; pwd')
-    check "$shn: gimp-build.sh isolated natively" "$th|$th/.local/share|$H/.config/GIMP/3.0/plug-ins|$src" "$out"
     unset GIMP_RUN_HOME
 
     # isolate.sh, the copy in the repositories: its short version without
     # gimp-devtools does the same as gimp-run.sh
     for dt in "$top" "$tmp/no devtools"; do
         [ "$dt" = "$top" ] && how=with || how=without
-        for fp in 1 0; do
-            out=$(cd "$src" && run bin-flatpak -- -c '
-                src=/nowhere devtools=$1 GIMP_FLATPAK=$2 GIMP_RUN_HOME=$3; shift 3
-                . "$0"
-                gimp_run --env="FOO=$1" --filesystem=/x -- sh -c "$2"' "$top/isolate.sh" "$dt" "$fp" "$th" "a 'b' \"c\"" "$show")
-            check "$shn: isolate.sh $how gimp-devtools, GIMP_FLATPAK=$fp" "${want%x|}|$src" "$out"
-            [ "$fp" = 1 ] && check "$shn: isolate.sh $how gimp-devtools: flatpak run with the throwaway home" \
-              "HOME=$th XDG_CONFIG_HOME=$th/.config FLATPAK_USER_DIR=$H/.local/share/flatpak" "$(cat "$tmp/flatpak.log.env")"
-        done
+        : > "$tmp/flatpak.log"
+        out=$(cd "$src" && run bin-flatpak -- -c '
+            src=/nowhere devtools=$1 GIMP_RUN_HOME=$2; shift 2
+            . "$0"
+            gimp_run --env="FOO=$1" --filesystem=/x -- sh -c "$2"' "$top/isolate.sh" "$dt" "$th" "a 'b' \"c\"" "$show")
+        check "$shn: isolate.sh $how gimp-devtools: GIMP natively despite a GIMP Flatpak" "${want%x|}|$src|" "$out|$(cat "$tmp/flatpak.log")"
+        out=$(cd "$src" && run bin-flatpak -- -c '
+            src=/nowhere devtools=$1 GIMP_RUN_HOME=$2; shift 2
+            . "$0"
+            gimp_run --app=org.blender.Blender --env="FOO=$1" --filesystem=/x -- sh -c "$2"' "$top/isolate.sh" "$dt" "$th" "a 'b' \"c\"" "$show")
+        check "$shn: isolate.sh $how gimp-devtools: another app in its Flatpak" "${want%x|}|$src" "$out"
+        check_has "$shn: isolate.sh $how gimp-devtools: runs in its Flatpak" " org.blender.Blender" "$(cat "$tmp/flatpak.log")"
+        check "$shn: isolate.sh $how gimp-devtools: flatpak run with the throwaway home" \
+          "HOME=$th XDG_CONFIG_HOME=$th/.config FLATPAK_USER_DIR=$H/.local/share/flatpak" "$(cat "$tmp/flatpak.log.env")"
         out=$(run bin-flatpak -- -c 'devtools=$1; . "$0"; GIMP_RUN_HOME=$2; gimp_run --timeout=5 -- sh -c "printf \"[%s]\" \"\$@\"" sh "two  words" "q\"u\`o\\te" ""; echo " $?"; gimp_run -- sh -c "exit 7"; echo $?' "$top/isolate.sh" "$dt" "$th")
         check "$shn: isolate.sh $how gimp-devtools: arguments and exit codes" "[two  words][q\"u\`o\\te][] 0
 7" "$out"
@@ -360,7 +336,7 @@ done
 # --- snapshot.sh -------------------------------------------------------------
 
 sh_home="$tmp/snapshot home"
-mkdir -p "$sh_home/.config/GIMP/3.2" "$sh_home/.var/app/org.gimp.GIMP/data/gvfs-metadata"
+mkdir -p "$sh_home/.config/GIMP/3.2" "$sh_home/.cache/gimp/3.2"
 echo x >"$sh_home/.config/GIMP/3.2/gimprc"
 SNAPSHOT_HOME="$sh_home" "$top/snapshot.sh" >"$tmp/snap1.txt"
 check_has "snapshot.sh lists files with type and size" "f 2 " "$(grep 'gimprc$' "$tmp/snap1.txt")"
@@ -369,12 +345,12 @@ check "snapshot.sh looks at GIMP, Blender, Godot, Krita and Tiled" 5 \
   "$(SNAPSHOT_HOME="$sh_home" "$top/snapshot.sh" --dirs | grep -ciE '/(\.config/GIMP|org\.blender\.Blender|org\.godotengine\.Godot|org\.kde\.krita|\.config/tiled)$')"
 SNAPSHOT_HOME="$sh_home" "$top/snapshot.sh" --compare "$tmp/snap1.txt" >/dev/null; rc=$?
 check "snapshot.sh --compare: nothing changed" 0 "$rc"
-touch -d '2001-01-01' "$sh_home/.var/app/org.gimp.GIMP/data/gvfs-metadata"
-: >"$sh_home/.var/app/org.gimp.GIMP/data/gvfs-metadata/root"
+touch -d '2001-01-01' "$sh_home/.cache/gimp/3.2"
+: >"$sh_home/.cache/gimp/3.2/root"
 out=$(SNAPSHOT_HOME="$sh_home" "$top/snapshot.sh" --compare "$tmp/snap1.txt"); rc=$?
 check "snapshot.sh --compare: a new file" 1 "$rc"
 check_has "snapshot.sh --compare names the new file" "> f 0 " "$out"
-check_has "snapshot.sh --compare names the changed folder" "gvfs-metadata" "$(printf '%s\n' "$out" | grep '^<')"
+check_has "snapshot.sh --compare names the changed folder" ".cache/gimp/3.2" "$(printf '%s\n' "$out" | grep '^<')"
 echo xy >"$sh_home/.config/GIMP/3.2/gimprc"
 SNAPSHOT_HOME="$sh_home" "$top/snapshot.sh" >"$tmp/snap2.txt"
 touch -r "$tmp/snap1.txt" "$sh_home/.config/GIMP/3.2/gimprc"

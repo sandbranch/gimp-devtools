@@ -1,7 +1,7 @@
 #!/bin/sh
 # End-to-end test of gui/cdp.mjs with GTK's Broadway backend: a GTK text
-# field on a Broadway display (the broadwayd and GTK of the Flatpak GIMP, or
-# of the system with GIMP_FLATPAK=0), a headless Chrome looking at it, and
+# field on a Broadway display (the system's broadwayd and GTK 3, as the
+# native GIMP uses them), a headless Chrome looking at it, and
 # cdp.mjs typing into it. Checks that the field ends up with every printable
 # ASCII character and that key: presses the keys it names.
 #
@@ -22,15 +22,9 @@ done
 [ -n "$chrome" ] || skip "no google-chrome or chromium (set CHROME)"
 command -v node >/dev/null 2>&1 || skip "no node"
 
-if [ "${GIMP_FLATPAK:-1}" = 1 ] && command -v flatpak >/dev/null 2>&1 &&
-    flatpak info org.gimp.GIMP >/dev/null 2>&1; then
-    flatpak=1
-elif command -v broadwayd >/dev/null 2>&1 &&
-    python3 -c "import gi; gi.require_version('Gtk', '3.0')" 2>/dev/null; then
-    flatpak=0
-else
-    skip "neither the Flatpak org.gimp.GIMP nor broadwayd and python3-gi with GTK 3"
-fi
+command -v broadwayd >/dev/null 2>&1 || skip "no broadwayd"
+python3 -c "import gi; gi.require_version('Gtk', '3.0')" 2>/dev/null ||
+    skip "no python3-gi with GTK 3"
 
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/cdp-broadway.XXXXXX") || exit 1
 free_port () {
@@ -53,13 +47,8 @@ trap 'exit 1' INT TERM
 inner="broadwayd --port $bport :$display >'$tmp/broadwayd.log' 2>&1 & bw=\$!;
     python3 '$here/broadway-entry.py' '$tmp'; kill \$bw"
 # (isolated from the user's folders by gimp-run.sh: without it, GTK
-# writes GIO's metadata into ~/.var/app/org.gimp.GIMP/data/gvfs-metadata)
-if [ "$flatpak" = 1 ]; then
-    mode=--flatpak
-else
-    mode=--native
-fi
-"$top/gimp-run.sh" "$mode" --home="$tmp/home" --filesystem="$tmp" --filesystem="$here" \
+# writes GIO's metadata into the user's data folder)
+"$top/gimp-run.sh" --native --home="$tmp/home" \
     --env=GDK_BACKEND=broadway --env=BROADWAY_DISPLAY=":$display" -- sh -c "$inner" &
 gtk_pid=$!
 

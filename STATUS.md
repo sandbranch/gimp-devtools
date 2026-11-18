@@ -61,11 +61,21 @@ GEGL versions are the ones in use); plug-ins `bimp`, `content-credentials`, `for
 `gimp-lensfun`, `gimp-lqr-tng`, `layerfx`, `luminosity-masks`,
 `pixel-art-scale`, `tileset-export` and `uv-tools`.
 
+## Native GIMP only (2026-11-18)
+
+GIMP is the native GIMP 3 (3.2.8 here, from the distribution), no longer
+the Flatpak: decided by David, as simpler and faster to build and test
+against. gimp-devtools refuses the GIMP Flatpak (`GIMP_FLATPAK=1`), and
+every repo's tests run the native GIMP. Other apps the link tests start
+(Godot, Krita, Inkscape) still run as Flatpaks where they are installed
+so; Blender is a snap. The research notes in `docs/` were written in
+2026-09 on the Flatpak GIMP 3.2.6 and say so.
+
 ## Rebuilding everything
 
 Everything builds from a fresh clone; nothing lives outside the repos.
-With the Flatpak GIMP, from each repo's folder
-(`gimp-build.sh` is in this repo):
+With the native GIMP 3 and its development files (`libgimp-3.0-dev`), from
+each repo's folder (`gimp-build.sh` is in this repo):
 
     # plug-ins
     gimp-build.sh . meson setup build -Dplugindir=\$GIMP_PLUGINDIR
@@ -76,8 +86,7 @@ With the Flatpak GIMP, from each repo's folder
     gimp-build.sh . meson setup build -Dmoduledir=\$GEGL_OPDIR
     gimp-build.sh . ninja -C build install
 
-Restart GIMP afterwards. The script says how to install the GNOME SDK if it
-is missing. For testing dialogs without a screen, see `gui/cdp.mjs` in the
+Restart GIMP afterwards. For testing dialogs without a screen, see `gui/cdp.mjs` in the
 README.
 
 ## Overnight queue (2026-09-25, from David)
@@ -153,7 +162,8 @@ leaks (carver list, vmap list) upstream.
 Every repo was reviewed for bugs, and each has a pass/fail test suite
 that runs with one command, without a display or network, in a
 throwaway GIMP profile (`GIMP3_DIRECTORY`), and under AddressSanitizer
-and UBSan (the Flatpak SDK has the runtimes; `flatpak run --devel`).
+and UBSan (with the system compiler's runtimes; until 2026-11 this ran
+in the Flatpak SDK).
 
 | Repo | Real bugs fixed | Checks |
 |---|---|---|
@@ -218,10 +228,10 @@ Nothing chosen yet.
 
 ## Test isolation (2026-09-27)
 
-GIMP runs in the Flatpak write GIO's file-metadata journal
-(`~/.var/app/org.gimp.GIMP/data/gvfs-metadata`), caches (babl, the ccache of
-builds) and `flatpak run` its `.ld.so` cache into the
-Flatpak's own folders, even with a throwaway `GIMP3_DIRECTORY`. Done: every
+GIMP runs write GIO's file-metadata journal, caches (babl, the ccache of
+builds) and more into the user's folders, even with a throwaway
+`GIMP3_DIRECTORY` (found in 2026-09 with the Flatpak GIMP, whose folders
+are `~/.var/app/org.gimp.GIMP`; the same holds natively). Done: every
 test script of the repos above starts GIMP (and Blender) through
 `gimp-run.sh` (via each repo's copy of `isolate.sh`), and builds with
 `GIMP_RUN_HOME` set; each suite lists the user's folders before and
@@ -231,7 +241,7 @@ has its own version of the same.
 ## Other open items
 
 - **Tests in the repos** (done 2026-09-26): every repo has `tests/run.sh`
-  (gimp-lensfun `tests/compare.sh`), which runs headless in the Flatpak
+  (gimp-lensfun `tests/compare.sh`), which runs headless in the native
   GIMP and checks results.
 - **Upstream pull requests.** Wavelet Denoise: upstream already has a
   pull request #6 by Arvil (8-bit only); plan is to open ours from
@@ -242,9 +252,9 @@ has its own version of the same.
   versions sit in Filters > Enhance. Sharpen's default amount to review.
 - **Liquid Rescale polish**: done (license string, `-DDEBUG`, deprecated
   GTK stock items, help registration and per-language help install).
-- **Packaging**: release tarballs, and Flatpak packages so the filters
-  work on other computers with Flatpak GIMP. Postponed until the filters
-  settle.
+- **Packaging**: release tarballs for the native GIMP. Flatpak GIMP
+  users are a separate question (docs/packaging.md: the Flatpak's
+  extension point does not merge GEGL ops); not planned for now.
 - **Focus Blur** became the GEGL filter Depth Blur, `depth:blur`
   (gegl-depth-blur, 2026-09-25): no plug-in port, since its upstream
   is gone and a GEGL filter covers it. Its own `PLAN.md` has the next
