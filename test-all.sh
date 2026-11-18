@@ -31,7 +31,7 @@ steps () {
         gegl-depth-blur) echo run.sh gimp-test.sh ;;
         gegl-equalizers) echo check.sh orig-check.sh gimp-check.sh gui/shots.sh ;;
         gegl-lut) echo check.sh crosscheck.sh gimp-check.sh ;;
-        gegl-photo-restore) echo check.sh gimp-check.sh ;;
+        gegl-photo-restore) echo check.sh gimp-check.sh gui/shots.sh ;;
         gegl-presence) echo check.sh gimp-check.sh gui/shots.sh ;;
         gegl-underwater) echo check.sh gimp-check.sh gimp-test.sh ;;
         gimp-forensics) echo run-all.sh ;;
