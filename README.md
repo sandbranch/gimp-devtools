@@ -106,6 +106,21 @@ folder or `/tmp`.
 (tests set it, so that a build and the checks it runs leave nothing in
 your folders either).
 
+## install-all.sh and check-installed.sh
+
+`install-all.sh` builds the sandbranch filters and plug-ins natively from
+the repositories next to gimp-devtools and installs them into your own
+GIMP (GEGL operations under `~/.local/share/gegl-0.4/plug-ins`, plug-ins
+into `~/.config/GIMP/3.2/plug-ins`); `install-all.sh gegl-lut gimp-fusion`
+does only those. Each meson repository is configured afresh in its
+`build-install` folder; Python plug-ins are copied over the installed
+folder, keeping files that are not in the repository.
+
+`check-installed.sh` then starts the native GIMP without a window,
+isolated from your profile but with your GEGL operations and plug-in
+folders added, and checks that every sandbranch operation and plug-in
+procedure registers.
+
 ## snapshot.sh
 
 Lists your own folders of GIMP, Blender, Godot, Krita and Tiled, native and
