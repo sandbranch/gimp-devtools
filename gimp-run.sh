@@ -93,6 +93,29 @@ home=$(CDPATH='' cd -- "$home" && pwd) || die "cannot enter $home"
 real_home=$(CDPATH='' cd -- "$HOME" 2>/dev/null && pwd)
 [ "$home" != "$real_home" ] && [ "$home" != / ] || die "$home is not a throwaway home"
 
+# the same interface font everywhere: GTK's "Sans" is DejaVu Sans (as in
+# the GIMP Flatpak the GUI tests were first measured with), not whatever
+# the system prefers (Noto Sans on Ubuntu, with taller rows), so that
+# clicks at fixed positions in GUI tests hit the same items on every
+# machine. A fonts.conf the test wrote itself is kept.
+if [ ! -f "$home/.config/fontconfig/fonts.conf" ]; then
+    mkdir -p "$home/.config/fontconfig" &&
+      cat > "$home/.config/fontconfig/fonts.conf" <<'FONTS'
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+<fontconfig>
+  <match target="pattern">
+    <test name="family"><string>Sans</string></test>
+    <edit name="family" mode="assign" binding="strong"><string>DejaVu Sans</string></edit>
+  </match>
+  <match target="pattern">
+    <test name="family"><string>sans-serif</string></test>
+    <edit name="family" mode="prepend" binding="strong"><string>DejaVu Sans</string></edit>
+  </match>
+</fontconfig>
+FONTS
+fi
+
 if [ "$app" = org.gimp.GIMP ]; then
     [ "$mode" != flatpak ] || die "the GIMP Flatpak is not supported; GIMP runs natively"
     mode=native

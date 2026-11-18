@@ -286,6 +286,17 @@ $H/.local/share/gegl-0.4/plug-ins" "$out"
     check "$shn: gimp-run --app --native" "$th/.local/share|" "$out|$(cat "$tmp/flatpak.log")"
     out=$(run bin-flatpak -- "$grun" --app=org.example.NotInstalled sh -c 'echo "$HOME|$FAKE_IN_FLATPAK"')
     check "$shn: gimp-run --app without its Flatpak runs natively" "$th|" "$out"
+    # the interface font: DejaVu Sans for "Sans", a test's own fonts.conf kept
+    fh="$tmp/font home"
+    rm -rf "$fh"
+    run bin-flatpak -- "$grun" --home="$fh" true >/dev/null
+    check_has "$shn: gimp-run pins Sans to DejaVu Sans" "<string>DejaVu Sans</string>" "$(cat "$fh/.config/fontconfig/fonts.conf" 2>/dev/null)"
+    echo mine > "$fh/.config/fontconfig/fonts.conf"
+    run bin-flatpak -- "$grun" --home="$fh" true >/dev/null
+    check "$shn: gimp-run keeps a test's own fonts.conf" mine "$(cat "$fh/.config/fontconfig/fonts.conf")"
+    rm -rf "$fh"
+    run bin-flatpak -- -c 'src=/nowhere devtools=$1 GIMP_RUN_HOME=$2; . "$0"; gimp_run -- true' "$top/isolate.sh" "$tmp/no devtools" "$fh" >/dev/null
+    check_has "$shn: isolate.sh without gimp-devtools pins the font too" "<string>DejaVu Sans</string>" "$(cat "$fh/.config/fontconfig/fonts.conf" 2>/dev/null)"
     unset GIMP_RUN_HOME
     out=$(run bin-flatpak -- "$grun" true); rc=$?
     check "$shn: gimp-run without a home fails" 2 "$rc"

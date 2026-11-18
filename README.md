@@ -98,6 +98,11 @@ Options (also as two words, `--home DIR`):
   ignored natively
 - `--devel`: run the Flatpak with its SDK; ignored natively
 
+The throwaway home also gets a `fonts.conf` that makes GTK's "Sans"
+DejaVu Sans (unless the test wrote its own): GUI tests click at fixed
+positions, and the system's default font (Noto Sans on Ubuntu, with
+taller rows) would move every menu item.
+
 Each argument of the command stays one word. The exit code is that of the
 command. For an app in a Flatpak, keep the throwaway home under your home
 folder or `/tmp`.
