@@ -71,6 +71,18 @@ every repo's tests run the native GIMP. Other apps the link tests start
 so; Blender is a snap. The research notes in `docs/` were written in
 2026-09 on the Flatpak GIMP 3.2.6 and say so.
 
+State on 2026-11-18, after the switch: `test-all.sh` runs every
+repository's full suite, GUI tests included, and all pass on GIMP 3.2.8
+(the GUI tests needed the interface font pinned to DejaVu Sans, see
+gimp-run.sh, and Filters menu items opened by name from Search Actions,
+since the native Filters menu has other entries than the Flatpak's).
+`install-all.sh` rebuilt everything natively into the user's GIMP (the
+Flatpak builds had `/app` paths, and Error Level Analysis and JPEG
+Ghost did not load at all against the system's libjpeg);
+`check-installed.sh` confirms that all 32 operations and every plug-in
+register. Some checks compare against the `gegl` command (Ubuntu package
+`gegl`); BIMP's HEIF case needs `libheif-plugin-x265`.
+
 ## Rebuilding everything
 
 Everything builds from a fresh clone; nothing lives outside the repos.
