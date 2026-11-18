@@ -126,6 +126,60 @@ isolated from your profile but with your GEGL operations and plug-in
 folders added, and checks that every sandbranch operation and plug-in
 procedure registers.
 
+## release.sh
+
+Makes the release files of the sandbranch repositories and draft GitHub
+releases of them:
+
+    release.sh list              # the repositories and their versions
+    release.sh build [repo...]   # build and check, into dist/<repo>/
+    release.sh draft repo...     # tag v<version> and make a DRAFT release
+
+`build` exports the committed HEAD of a repository (`git archive`, so
+nothing uncommitted gets in), builds it natively in a fresh work folder
+(isolated, as `gimp-build.sh` with `GIMP_RUN_HOME`) and installs it into a
+staging home, never into your GIMP. Then it packs it:
+
+- C and GEGL repositories: `<repo>-<version>-linux-x86_64.tar.gz`, which
+  the user extracts with `tar -xzf ... -C ~`. It holds only the package's
+  own folders, `.local/share/gegl-0.4/plug-ins/<repo>/` for GEGL
+  operations and `.config/GIMP/3.2/plug-ins/<name>/` for plug-ins (not
+  `.config` itself, whose permissions tar would change). Bundled
+  libraries (lensfun, liblqr) are linked in statically; gimp-forensics
+  includes the C2PA library that `fetch-deps.py` fetches.
+- Python plug-ins: `<repo>-<version>.zip` of the plug-in folder, unpacked
+  into GIMP's plug-in folder (Inkscape's extensions folder for
+  inkscape-xcf-export). gimp-blender-link also gets the Blender extension
+  and legacy add-on from its own `tools/build.sh`.
+
+Every folder gets `INSTALL.txt` (the folders, what it was built against,
+how to uninstall) and the licence files, plus `THIRD-PARTY-NOTICES.txt`
+and `third-party/` for bundled libraries. meson is configured with a home
+that does not exist (`/release-home`), and a binary that keeps that path
+fails the build, since it would break once moved (lensfun:correct keeps
+it only as a fallback; it finds its database next to itself).
+
+Each package is then checked the way a user would install it: extracted
+into a throwaway home and GIMP started there without a window
+(`gimp-console`, through `gimp-run.sh`). Every GEGL operation the source
+defines must register, and every plug-in folder must register procedures
+(read from GIMP's `pluginrc` and looked up in the PDB). gimp-lensfun's
+operation must also correct an image with its database, and
+inkscape-xcf-export must export a drawing in Inkscape that GIMP opens.
+The results are in `dist/<repo>/check.log`, the checksums in
+`dist/<repo>/SHA256SUMS` and `dist/SHA256SUMS`, the text of the release in
+`dist/<repo>/RELEASE-NOTES.md` (from the README). `dist/` is not committed.
+
+The version comes from `meson.build` (`0.1` becomes `0.1.0`), else from
+the Blender manifest, else it is 0.1.0; a version such as `3.0.0-dev` is
+refused.
+
+`draft` only works on a build of the current HEAD that is pushed. It makes
+an annotated tag `v<version>` on HEAD, pushes it, and creates the release
+with `gh release create --draft`, never a published one; it stops if a
+release of that tag exists. With `RELEASE_NO_TAG=1` it pushes no tag: the
+draft targets HEAD and GitHub makes the tag when the release is published.
+
 ## snapshot.sh
 
 Lists your own folders of GIMP, Blender, Godot, Krita and Tiled, native and
