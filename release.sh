@@ -61,7 +61,7 @@ all="gegl-adjustments gegl-control-points gegl-presence gegl-equalizers gegl-lut
 gegl-depth-blur gegl-underwater gegl-wavelet gimp-forensics gimp-fusion
 gimp-save-for-web gimp-layerfx gimp-lensfun gimp-bimp gimp-lqr-tng
 gimp-pixel-scale gimp-tileset-export gimp-uv-tools gimp-blender-link
-inkscape-xcf-export"
+inkscape-xcf-export gegl-astro gegl-photo-restore gimp-auto-perspective"
 
 # the folders inside a home, relative to it
 GEGL_REL=.local/share/gegl-0.4/plug-ins
@@ -123,6 +123,7 @@ meson_extra () {
         gimp-lensfun) echo -Dgegl_op=enabled -Dbundled_lensfun=enabled ;;
         gimp-lqr-tng) echo -Dbundled_liblqr=enabled -Dplugin=enabled ;;
         gimp-fusion) echo -Dplugin=enabled ;;
+        gimp-auto-perspective) echo -Dplugin=enabled ;;
     esac
 }
 
