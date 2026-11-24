@@ -47,7 +47,7 @@ pdb = Gimp.get_pdb()
 procs = set(pdb.query_procedures('.*', '', '', '', '', '', '', ''))
 for words in ['bimp', 'fusion', 'lensfun', 'lqr', 'layerfx', 'save-for-web',
               'tileset', 'uv', 'blender', 'forensics', 'jpeg-info',
-              'content-credentials', 'luminosity', 'pixel-art', 'gegl-nodes']:
+              'content-credentials', 'luminosity', 'pixel-art']:
     hits = sorted(p for p in procs if words in p)
     fails += not hits
     print('%s procedure *%s*: %s' % ('PASS' if hits else 'FAIL', words, ' '.join(hits)))

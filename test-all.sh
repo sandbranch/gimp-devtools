@@ -37,7 +37,7 @@ steps () {
         gimp-forensics) echo run-all.sh ;;
         gimp-lqr-tng) echo run.sh gui/gui-test.sh ;;
         gegl-wavelet|gimp-auto-perspective|gimp-bimp|gimp-blender-link|gimp-fusion|\
-        gimp-gegl-nodes|gimp-layerfx|gimp-lensfun|gimp-lqr|gimp-pixel-scale|\
+        gimp-layerfx|gimp-lensfun|gimp-lqr|gimp-pixel-scale|\
         gimp-save-for-web|gimp-tileset-export|gimp-uv-tools|gimp-wavelet-denoise|\
         gimp-wavelet-sharpen|inkscape-xcf-export) echo run.sh ;;
         *) return 1 ;;
@@ -47,7 +47,7 @@ steps () {
 all="gegl-adjustments gegl-astro gegl-control-points gegl-depth-blur
 gegl-equalizers gegl-lut gegl-photo-restore gegl-presence gegl-underwater
 gegl-wavelet gimp-auto-perspective gimp-bimp gimp-blender-link gimp-forensics
-gimp-fusion gimp-gegl-nodes gimp-layerfx gimp-lensfun gimp-lqr gimp-lqr-tng
+gimp-fusion gimp-layerfx gimp-lensfun gimp-lqr gimp-lqr-tng
 gimp-pixel-scale gimp-save-for-web gimp-tileset-export gimp-uv-tools
 gimp-wavelet-denoise gimp-wavelet-sharpen inkscape-xcf-export"
 [ $# -gt 0 ] || set -- $all
